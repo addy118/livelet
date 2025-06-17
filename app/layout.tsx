@@ -3,10 +3,11 @@ import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
 import { Navbar } from "./(protected)/_components/navbar";
+import { Providers } from "./Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Auth Kit - Secure Authentication",
+  title: "Livelet - Secure Authentication",
   description: "Modern authentication system built with Next.js",
 };
 
@@ -21,14 +22,16 @@ export default async function RootLayout({
     <html lang="en" className="dark">
       <body className="min-h-screen bg-gradient-to-br from-[#000000] via-[#111111] to-[#000000]">
         <SessionProvider session={session}>
-          <div className="min-h-screen w-full flex flex-col">
-            <Navbar />
-            <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-              <div className="w-full max-w-md">{children}</div>
-            </main>
-          </div>
+          <Providers>
+            <div className="min-h-screen w-full flex flex-col">
+              <Navbar />
+              <main className="flex-1 p-4 sm:p-6 lg:p-8">
+                <div className="w-full h-full">{children}</div>
+              </main>
+            </div>
+          </Providers>
         </SessionProvider>
-      </body>
+      </body> 
     </html>
   );
 }

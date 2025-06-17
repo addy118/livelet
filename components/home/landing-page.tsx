@@ -18,7 +18,7 @@ export const LandingPage = () => {
           font.className
         )}
       >
-        Auth Kit
+        Livelet
       </h1>
       <p className="text-gray-300">A simple authentication service</p>
       <div>

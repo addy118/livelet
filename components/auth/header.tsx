@@ -7,7 +7,7 @@ export const Header = ({ label }: HeaderProps) => {
     <div className="w-full flex flex-col gap-y-6 items-center justify-center text-center">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-[#ffffff] tracking-tight">
-          Auth Kit
+          Livelet
         </h1>
         <div className="w-12 h-0.5 bg-gradient-to-r from-[#ffffff] to-[#888888] mx-auto rounded-full"></div>
       </div>

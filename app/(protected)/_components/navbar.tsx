@@ -11,7 +11,7 @@ export const Navbar = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <h1 className="text-xl font-bold text-[#ffffff] tracking-tight">
-                Auth Kit
+                Livelet
               </h1>
             </div>
             <div className="flex items-center">

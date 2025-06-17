@@ -1,10 +1,16 @@
 import React from "react";
+import { Room } from "../Room";
+import { CollaborativeEditor } from "@/components/collab-editor";
 
 const Example = () => {
   return (
-    <div>
-      Example Page
-    </div>
+    <>
+      <main>
+        <Room>
+          <CollaborativeEditor />
+        </Room>
+      </main>
+    </>
   );
 };
 
