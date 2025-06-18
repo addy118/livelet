@@ -39,7 +39,6 @@ export const LoginForm = () => {
   const [isPending, startTransition] = useTransition();
 
   const devDefault = {
-    name: "Aditya Kirti",
     email: "addyyy118@gmail.com",
     password: "Hello@18",
   };
@@ -50,8 +49,8 @@ export const LoginForm = () => {
       process.env.NODE_ENV === "development"
         ? devDefault
         : {
-            email: "addyyy118@gmail.com",
-            password: "Hello@18",
+            email: "",
+            password: "",
           },
   });
 

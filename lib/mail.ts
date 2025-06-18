@@ -1,9 +1,13 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const baseUrl =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "https://livelet.adityakirti.tech";
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const confirmLink = `http://localhost:3000/new-verification?token=${token}`;
+  const confirmLink = `${baseUrl}/new-verification?token=${token}`;
 
   await resend.emails.send({
     from: "no-reply@adityakirti.tech",
@@ -16,7 +20,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendEmailChangeEmail = async (email: string, token: string) => {
-  const confirmLink = `http://localhost:3000/change-email?token=${token}`;
+  const confirmLink = `${baseUrl}/change-email?token=${token}`;
 
   await resend.emails.send({
     from: "no-reply@adityakirti.tech",
@@ -29,7 +33,7 @@ export const sendEmailChangeEmail = async (email: string, token: string) => {
 };
 
 export const sendPassResetEmail = async (email: string, token: string) => {
-  const resetLink = `http://localhost:3000/new-password?token=${token}`;
+  const resetLink = `${baseUrl}/new-password?token=${token}`;
 
   await resend.emails.send({
     from: "no-reply@adityakirti.tech",
@@ -48,6 +52,6 @@ export const sendTwoFactorConf = async (email: string, token: string) => {
     subject: "Two Factor Authentication Code",
     html: `
     <p>Your 2FA Code: ${token}</p>
-    `
-  })
-}
+    `,
+  });
+};
