@@ -24,13 +24,23 @@ export const RegiForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
+
+  const devDefault = {
+    name: "Aditya Kirti",
+    email: "addyyy118@gmail.com",
+    password: "Hello@18",
+  };
+
   const form = useForm<z.infer<typeof RegiSchema>>({
     resolver: zodResolver(RegiSchema),
-    defaultValues: {
-      name: "Aditya Kirti",
-      email: "addyyy118@gmail.com",
-      password: "Hello@18",
-    },
+    defaultValues:
+      process.env.NODE_ENV === "development"
+        ? devDefault
+        : {
+            name: "",
+            email: "",
+            password: "",
+          },
   });
 
   useEffect(() => {

@@ -38,12 +38,21 @@ export const LoginForm = () => {
   const [twoFactorMail, setTwoFactorMail] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
 
+  const devDefault = {
+    name: "Aditya Kirti",
+    email: "addyyy118@gmail.com",
+    password: "Hello@18",
+  };
+
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
-    defaultValues: {
-      email: "addyyy118@gmail.com",
-      password: "Hello@18",
-    },
+    defaultValues:
+      process.env.NODE_ENV === "development"
+        ? devDefault
+        : {
+            email: "addyyy118@gmail.com",
+            password: "Hello@18",
+          },
   });
 
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
