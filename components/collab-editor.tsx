@@ -233,7 +233,7 @@ export function CollaborativeEditor() {
   };
 
   return (
-    <div className="flex border border-black/70 flex-col relative rounded-xl bg-white w-full h-full h-[calc(100vh-64px)] text-gray-900 overflow-hidden">
+    <div className="flex border border-black/70 flex-col relative rounded-xl bg-white w-full  h-[calc(100vh-64px)] text-gray-900 overflow-hidden">
       <div className="flex bg-[#262727] justify-between items-center">
         <div>
           {yUndoManager ? <Toolbar yUndoManager={yUndoManager} /> : null}
