@@ -10,6 +10,18 @@ import { javascript } from "@codemirror/lang-javascript";
 import { yCollab } from "y-codemirror.next";
 import { Toolbar } from "./toolbar";
 import { Avatars } from "./liveblocks-avatar";
+
+import axios from "axios";
+import { AiOutlineEnter } from "react-icons/ai";
+import { CgSpinner } from "react-icons/cg";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 // import { HighlightStyle, tags as t } from "@codemirror/highlight";
 
 // const customHighlightStyle = HighlightStyle.define([
@@ -59,9 +71,23 @@ const customDarkTheme = EditorView.theme(
   { dark: true }
 );
 
+const languageMap = {
+  c: 1,
+  cpp: 2,
+  java: 4,
+  csharp: 22,
+  python: 28,
+} as const;
 
+type Language = keyof typeof languageMap;
 
 export function CollaborativeEditor() {
+  const [code, setCode] = useState("");
+  const [output, setOutput] = useState("");
+  const [status, setStatus] = useState("Run");
+  const [language, setLanguage] = useState<Language>("python");
+  const apiBaseUrl = "https://judge0-extra-ce.p.rapidapi.com";
+
   const room = useRoom();
 
   // liveblocks x yjs
@@ -78,6 +104,7 @@ export function CollaborativeEditor() {
   }, []);
 
   // set up liveblocks yjs provider & attach codemirror editor
+  const [yTextInstance, setYTextInstance] = useState<Y.Text | null>(null);
   useEffect(
     () => {
       if (!element || !room || !userInfo) return;
@@ -85,6 +112,7 @@ export function CollaborativeEditor() {
       // create yjs provider & document
       const ydoc = provider.getYDoc();
       const ytext = ydoc.getText("codemirror");
+      setYTextInstance(ytext);
       const undoManager = new Y.UndoManager(ytext);
       setYUndoManager(undoManager);
 
@@ -129,16 +157,131 @@ export function CollaborativeEditor() {
     [element, room, userInfo]
   );
 
+  const handleCodeSubmit = async () => {
+    setStatus("Submitting...");
+    setOutput("");
+    if (!yTextInstance) {
+      console.error("Editor is not ready yet.");
+      return;
+    }
+    setCode(yTextInstance.toString());
+    try {
+      const { data: submission } = await axios.post(
+        `${apiBaseUrl}/submissions?base64_encoded=false&wait=false`,
+        {
+          source_code: yTextInstance.toString() || "",
+          language_id: languageMap[language],
+          stdin: "",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-RapidAPI-Key": process.env.NEXT_PUBLIC_JUDGE_API || "",
+            "X-RapidAPI-Host": "judge0-extra-ce.p.rapidapi.com",
+          },
+        }
+      );
+
+      const token = submission.token;
+      setStatus("Queued...");
+
+      let result;
+      for (let i = 0; i < 10; i++) {
+        try {
+          const { data } = await axios.get(
+            `${apiBaseUrl}/submissions/${token}?base64_encoded=false`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                "X-RapidAPI-Key": process.env.NEXT_PUBLIC_JUDGE_API || "",
+                "X-RapidAPI-Host": "judge0-extra-ce.p.rapidapi.com",
+              },
+            }
+          );
+
+          if (data.status.id === 1) {
+            setStatus("In Queue...");
+          } else if (data.status.id === 2) {
+            setStatus("Running...");
+          } else {
+            result = data;
+            break;
+          }
+        } catch (pollErr) {
+          console.error("Polling error:", pollErr);
+          setOutput("Failed to get execution result. Try again.");
+          return;
+        }
+
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+
+      if (result) {
+        if (result.stdout) setOutput(result.stdout.trim());
+        else if (result.stderr) setOutput(result.stderr.trim());
+        else if (result.compile_output) setOutput(result.compile_output.trim());
+        else setOutput("No output.");
+      } else {
+        setOutput("Execution timed out. Try again.");
+      }
+    } catch (error) {
+      console.error("Judge0 API error:", error);
+      setOutput("Execution failed. Check your code or try again.");
+    } finally {
+      setStatus("Run");
+    }
+  };
+
   return (
     <div className="flex border border-black/70 flex-col relative rounded-xl bg-white w-full h-full h-[calc(100vh-64px)] text-gray-900 overflow-hidden">
       <div className="flex bg-[#262727] justify-between items-center">
         <div>
           {yUndoManager ? <Toolbar yUndoManager={yUndoManager} /> : null}
         </div>
+        <div className="flex items-center gap-2 p-2 text-white">
+          <Select
+            onValueChange={(e) => setLanguage(e as Language)}
+            defaultValue={language}
+          >
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Python" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="python">Python</SelectItem>
+              <SelectItem value="c">C</SelectItem>
+              <SelectItem value="cpp">CPP</SelectItem>
+              <SelectItem value="java">Java</SelectItem>
+              <SelectItem value="csharp">C#</SelectItem>
+            </SelectContent>
+          </Select>
+          <button
+            disabled={status !== "Run"}
+            className={`bg-green-500 dark:bg-green-300 text-black p-2 px-5 rounded-xl inline-flex items-center transition-transform font-bold disabled:opacity-50 disabled:cursor-not-allowed`}
+            onClick={handleCodeSubmit}
+          >
+            {status}
+            {status === "Run" ? (
+              <AiOutlineEnter className="ml-2" />
+            ) : (
+              <CgSpinner className="ml-2 animate-spin" />
+            )}
+          </button>
+        </div>
         <Avatars />
       </div>
-      <div className="relative flex-grow overflow-auto" ref={ref}>
-        {/* the editor view component from codemirror renders here */}
+      <div className="flex flow-col ">
+        <div className="relative flex-grow overflow-auto" ref={ref}></div>
+        <div className="flex flex-col flex-shrink-0 w-full lg:w-1/3 p-3 bg-gray-100 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <div className="font-bold">OUTPUT</div>
+          </div>
+          <pre
+            aria-live="polite"
+            className="whitespace-pre-wrap break-words flex-grow text-sm overflow-y-auto max-h-96 p-1"
+          >
+            {output || "Your output will appear here..."}
+          </pre>
+        </div>
       </div>
     </div>
   );

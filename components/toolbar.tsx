@@ -22,6 +22,8 @@ export function Toolbar({ yUndoManager }: Props) {
       >
         <RedoIcon />
       </button>
+
+      
     </div>
   );
 }
