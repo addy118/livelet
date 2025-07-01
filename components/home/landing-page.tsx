@@ -20,7 +20,7 @@ export const LandingPage = () => {
       >
         Livelet
       </h1>
-      <p className="text-gray-300">A simple authentication service</p>
+      <p className="text-gray-300">A collaborative code environment service</p>
       <div>
         <LoginButton>
           <Button variant="secondary" size="lg">

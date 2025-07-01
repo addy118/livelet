@@ -14,7 +14,7 @@ interface RegiButtonProps {
 export const RegiButton = ({
   children,
   mode = "redirect",
-  asChild,
+  // asChild,
 }: RegiButtonProps) => {
   const router = useRouter();
 

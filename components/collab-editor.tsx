@@ -178,12 +178,12 @@ export function CollaborativeEditor() {
   };
 
   return (
-    <div className="flex flex-col border border-black/70 rounded-xl w-full h-full h-[calc(100vh-64px)] overflow-hidden text-gray-900 bg-white">
+    <div className="flex flex-col border border-black/70 rounded-xl w-full h-full overflow-hidden text-gray-900 bg-white">
       <div className="flex justify-between items-center bg-[#262727]">
         {yUndoManager && <Toolbar yUndoManager={yUndoManager} />}
         <div className="flex items-center gap-2 p-2 text-white">
           <Select
-            onValueChange={(val) => setLanguage(val as Language)}
+            onValueChange={(val: Language) => setLanguage(val)}
             defaultValue={language}
           >
             <SelectTrigger className="w-40">
@@ -214,7 +214,10 @@ export function CollaborativeEditor() {
       </div>
 
       <div className="flex flex-col lg:flex-row">
-        <div className="relative flex-grow min-h-[400px] overflow-auto bg-black" ref={ref} />
+        <div
+          className="relative flex-grow min-h-[400px] overflow-auto bg-black"
+          ref={ref}
+        />
         <div className="flex flex-col flex-shrink-0 w-full lg:w-1/3 p-3 bg-gray-100 rounded-lg">
           <div className="font-bold mb-2">OUTPUT</div>
           <div
