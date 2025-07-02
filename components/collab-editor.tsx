@@ -81,8 +81,8 @@ export function CollaborativeEditor() {
 
     provider.awareness.setLocalStateField("user", {
       name: userInfo.name,
-      color: userInfo.color,
-      colorLight: userInfo.color + "80",
+      color: userInfo.colors[1],
+      colorLight: userInfo.colors[0] + "80",
     });
 
     const state = EditorState.create({
@@ -224,6 +224,7 @@ export function CollaborativeEditor() {
             )}
           </button>
         </div>
+
         <Avatars />
       </div>
 

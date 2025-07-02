@@ -1,19 +1,22 @@
 import { useOthers, useSelf } from "@liveblocks/react/suspense";
-import type { UserInfo } from "@/app/api/liveblocks-auth/route";
+// import type { UserInfo } from "@/app/api/liveblocks-auth/route";
 
 export function Avatars() {
   const users = useOthers();
   const currentUser = useSelf();
+  console.log("from avatars()");
+  console.log("others:", users.map(u => u.info));
+  console.log("self:", currentUser?.info);
 
   return (
     <div className=" flex px-3">
       {users.map(({ connectionId, info }) => {
-        const userInfo = info as unknown;
+        const userInfo = info;
         return (
           <Avatar
             key={connectionId}
-            picture={(userInfo as UserInfo).picture}
-            name={(userInfo as UserInfo).name}
+            picture={userInfo.avatar}
+            name={userInfo.name}
           />
         );
       })}
@@ -21,10 +24,10 @@ export function Avatars() {
       {currentUser &&
         currentUser.info &&
         currentUser.info.name &&
-        currentUser.info.picture && (
+        currentUser.info.avatar && (
           <div className="relative ml-8 first:ml-0">
             <Avatar
-              picture={currentUser.info.picture as string}
+              picture={currentUser.info.avatar}
               name={currentUser.info.name}
             />
           </div>
