@@ -1,4 +1,5 @@
 //liveblocks.io/docs/authentication
+import { currentUser } from "@/lib/auth";
 import { Liveblocks } from "@liveblocks/node"
 import { NextRequest } from "next/server";
 
@@ -15,67 +16,48 @@ export interface UserInfo {
   picture: string;
 }
 
-let userCounter = 0;
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function POST(req: NextRequest) {
   // get user id from the database
-  const userId = userCounter % USER_INFO.length;
-  userCounter++;
+  const user = await currentUser();
+  if (!user || !user.id) return new Response("Unauthorized", { status: 401 });
 
-  // create a session for the current user
-  // this userInfo is made available in Liveblocks presence hooks, eg. useOthers
-  const session = liveblocks.prepareSession(`user-${userId}-${Date.now()}`, {
-    userInfo: USER_INFO[userId],
-  });
+  const color = LIVEBLOCKS_COLORS[Math.floor(Math.random() * 8)];
 
-  // use a naming pattern to allow access to rooms with a wildcard
-  session.allow(`liveblocks:examples:*`, session.FULL_ACCESS);
+  const { status, body } = await liveblocks.identifyUser({
+    userId: user.id,
+    groupIds: []
+  }, 
+  {
+    // user meta-data
+    userInfo: {
+      name: user.name ?? "Guest",
+      avatar: user.image ?? `https://liveblocks.io/avatars/avatar-${Math.floor(Math.random() * 8) + 1}.png`,
+      colors: [color, color, color]
+    }
+  })
 
-  // authorize the user and return the result
-  const { body, status } = await session.authorize();
+  // create a room w/ different permissions
+  const room = await liveblocks.createRoom(`${user.id}-room-3`, {
+    defaultAccesses: ["room:read", "room:presence:write"],
+    groupsAccesses: {
+      "custom-group-id": ["room:write"],
+    },
+    usersAccesses: {
+      [user.id]: ["room:write"],
+    }
+  })
+
   return new Response(body, { status });
 }
 
-const USER_INFO = [
-  {
-    name: "User 1",
-    color: "#D583F0",
-    picture: "https://liveblocks.io/avatars/avatar-1.png",
-  },
-  {
-    name: "User 2",
-    color: "#F08385",
-    picture: "https://liveblocks.io/avatars/avatar-2.png",
-  },
-  {
-    name: "User 3",
-    color: "#F0D885",
-    picture: "https://liveblocks.io/avatars/avatar-3.png",
-  },
-  {
-    name: "User 4",
-    color: "#85EED6",
-    picture: "https://liveblocks.io/avatars/avatar-4.png",
-  },
-  {
-    name: "User 5",
-    color: "#85BBF0",
-    picture: "https://liveblocks.io/avatars/avatar-5.png",
-  },
-  {
-    name: "User 6",
-    color: "#8594F0",
-    picture: "https://liveblocks.io/avatars/avatar-6.png",
-  },
-  {
-    name: "User 7",
-    color: "#85DBF0",
-    picture: "https://liveblocks.io/avatars/avatar-7.png",
-  },
-  {
-    name: "User 8",
-    color: "#87EE85",
-    picture: "https://liveblocks.io/avatars/avatar-8.png",
-  },
+const LIVEBLOCKS_COLORS = [
+  "#D583F0", 
+  "#F08385", 
+  "#F0D885", 
+  "#85EED6", 
+  "#85BBF0", 
+  "#8594F0", 
+  "#85DBF0", 
+  "#87EE85", 
 ];

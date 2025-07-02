@@ -78,8 +78,8 @@ export function CollaborativeEditor() {
 
     provider.awareness.setLocalStateField("user", {
       name: userInfo.name,
-      color: userInfo.color,
-      colorLight: userInfo.color + "80",
+      color: userInfo.colors[1],
+      colorLight: userInfo.colors[0] + "80",
     });
 
     const state = EditorState.create({
@@ -179,8 +179,10 @@ export function CollaborativeEditor() {
 
   return (
     <div className="flex flex-col border border-black/70 rounded-xl w-full h-full overflow-hidden text-gray-900 bg-white">
+      {/* editor header */}
       <div className="flex justify-between items-center bg-[#262727]">
         {yUndoManager && <Toolbar yUndoManager={yUndoManager} />}
+
         <div className="flex items-center gap-2 p-2 text-white">
           <Select
             onValueChange={(val: Language) => setLanguage(val)}
@@ -210,14 +212,18 @@ export function CollaborativeEditor() {
             )}
           </button>
         </div>
+
         <Avatars />
       </div>
 
       <div className="flex flex-col lg:flex-row">
+        {/* code editor field */}
         <div
           className="relative flex-grow min-h-[400px] overflow-auto bg-black"
           ref={ref}
         />
+
+        {/* output area */}
         <div className="flex flex-col flex-shrink-0 w-full lg:w-1/3 p-3 bg-gray-100 rounded-lg">
           <div className="font-bold mb-2">OUTPUT</div>
           <div
