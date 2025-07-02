@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import Split from "react-split";
 
 const customDarkTheme = EditorView.theme(
   {
@@ -29,6 +30,9 @@ const customDarkTheme = EditorView.theme(
       backgroundColor: "#0e0e0e",
       color: "#4b5563",
       border: "none",
+    },
+    ".cm-scroller": {
+      scrollBehavior: "smooth",
     },
     ".cm-activeLine": { backgroundColor: "#1e1e1e" },
     ".cm-activeLineGutter": { backgroundColor: "#1e1e1e", color: "#f9fafb" },
@@ -51,11 +55,10 @@ export function CollaborativeEditor() {
   const [outputStatus, setOutputStatus] = useState<"success" | "error" | null>(
     null
   );
-
   const [status, setStatus] = useState("Run");
   const [language, setLanguage] = useState<Language>("python");
-  const apiBaseUrl = "https://judge0-extra-ce.p.rapidapi.com";
 
+  const apiBaseUrl = "https://judge0-extra-ce.p.rapidapi.com";
   const room = useRoom();
   const provider = getYjsProviderForRoom(room);
   const [element, setElement] = useState<HTMLElement | null>(null);
@@ -89,6 +92,7 @@ export function CollaborativeEditor() {
         javascript(),
         yCollab(ytext, provider.awareness, { undoManager }),
         customDarkTheme,
+        EditorView.lineWrapping,
       ],
     });
 
@@ -98,16 +102,9 @@ export function CollaborativeEditor() {
   }, [element, room, userInfo, provider]);
 
   const handleCodeSubmit = async () => {
-    if (!yTextInstance) {
-      console.error("Editor is not ready yet.");
-      return;
-    }
-
+    if (!yTextInstance) return alert("Editor not ready!");
     const currentCode = yTextInstance.toString().trim();
-    if (!currentCode) {
-      alert("No code provided!");
-      return;
-    }
+    if (!currentCode) return alert("No code provided!");
 
     setStatus("Submitting...");
     setOutput("");
@@ -169,27 +166,44 @@ export function CollaborativeEditor() {
         setOutput("Execution timed out. Try again.");
         setOutputStatus("error");
       }
-    } catch (error) {
-      console.error("Judge0 API error:", error);
-      setOutput("Execution failed. Check your code or try again.");
+    } catch (e) {
+      console.error("Judge0 API error", e);
+      setOutput("Execution failed. Try again.");
+      setOutputStatus("error");
     } finally {
       setStatus("Run");
     }
   };
 
+  const createGutter = (direction: string) => {
+    const gutter = document.createElement("div");
+    gutter.className = `
+      flex items-center justify-center
+      bg-black hover:bg-blue-900 transition
+      ${direction === "horizontal" ? "cursor-col-resize" : "cursor-row-resize"}
+    `;
+    const dot = document.createElement("div");
+    dot.className = `
+      rounded-full bg-gray-300
+      ${direction === "horizontal" ? "w-1 h-6" : "w-6 h-1"}
+    `;
+    gutter.appendChild(dot);
+    return gutter;
+  };
+
   return (
-    <div className="flex flex-col border border-black/70 rounded-xl w-full h-full overflow-hidden text-gray-900 bg-white">
-      <div className="flex justify-between items-center bg-[#262727]">
+    <div className="flex flex-col w-full h-screen bg-[#0e0e0e] text-gray-200">
+      <div className="flex justify-between items-center bg-[#1a1a1a] p-2 shadow-md">
         {yUndoManager && <Toolbar yUndoManager={yUndoManager} />}
-        <div className="flex items-center gap-2 p-2 text-white">
+        <div className="flex items-center gap-2">
           <Select
             onValueChange={(val: Language) => setLanguage(val)}
             defaultValue={language}
           >
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 bg-[#2b2b2b] border-none text-gray-200 focus:ring-0">
               <SelectValue placeholder="Python" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#2b2b2b] text-gray-200">
               {Object.keys(languageMap).map((lang) => (
                 <SelectItem key={lang} value={lang}>
                   {lang.toUpperCase()}
@@ -200,7 +214,7 @@ export function CollaborativeEditor() {
           <button
             disabled={status !== "Run"}
             onClick={handleCodeSubmit}
-            className="bg-green-500 dark:bg-green-300 text-black p-2 px-5 rounded-xl inline-flex items-center font-bold transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-green-500 text-black p-2 px-5 rounded-xl inline-flex items-center font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {status}
             {status === "Run" ? (
@@ -213,27 +227,48 @@ export function CollaborativeEditor() {
         <Avatars />
       </div>
 
-      <div className="flex flex-col lg:flex-row">
-        <div
-          className="relative flex-grow min-h-[400px] overflow-auto bg-black"
-          ref={ref}
-        />
-        <div className="flex flex-col flex-shrink-0 w-full lg:w-1/3 p-3 bg-gray-100 rounded-lg">
-          <div className="font-bold mb-2">OUTPUT</div>
-          <div
-            className={`flex-grow whitespace-pre-wrap break-words text-sm overflow-y-auto max-h-96 p-2 rounded-lg border ${
-              outputStatus === "success"
-                ? "bg-green-50 border-green-300 text-green-800"
-                : outputStatus === "error"
-                  ? "bg-red-50 border-red-300 text-red-800"
-                  : "bg-gray-50 border-gray-300 text-gray-800"
-            }`}
-            aria-live="polite"
-          >
-            {output || "Your output will appear here..."}
+      <Split
+        className="flex w-full h-full"
+        sizes={[75, 25]}
+        minSize={[300, 150]}
+        gutterSize={6}
+        gutter={(i, d) => createGutter(d)}
+      >
+        <Split
+          className="flex flex-col w-full h-full"
+          sizes={[70, 30]}
+          minSize={[200, 100]}
+          direction="vertical"
+          gutterSize={6}
+          gutter={(i, d) => createGutter(d)}
+        >
+          <div className="flex-grow flex flex-col min-h-0 bg-black">
+            <div className="flex-grow min-h-0 relative overflow-auto bg-black" ref={ref} />
+          </div>
+          <div className="flex flex-col p-3 bg-[#1e1e1e] rounded-lg overflow-hidden">
+            <div className="font-bold mb-2 text-gray-300">OUTPUT</div>
+            <div
+              className={`flex-grow whitespace-pre-wrap break-words text-sm overflow-y-auto rounded-lg border p-2 ${
+                outputStatus === "success"
+                  ? "bg-green-100/10 border-green-500 text-green-300"
+                  : outputStatus === "error"
+                    ? "bg-red-100/10 border-red-500 text-red-300"
+                    : "bg-gray-700 border-gray-500 text-gray-300"
+              }`}
+              aria-live="polite"
+            >
+              {output || "Your output will appear here..."}
+            </div>
+          </div>
+        </Split>
+
+        <div className="flex flex-col w-full h-full p-3 bg-[#1a1a1a] rounded-lg overflow-hidden">
+          <div className="font-bold mb-2 text-gray-300">CHAT (Coming Soon)</div>
+          <div className="flex-grow flex items-center justify-center text-gray-400 text-sm text-center border border-dashed border-gray-600 rounded-lg p-4">
+            Collaborative chat feature will appear here.
           </div>
         </div>
-      </div>
+      </Split>
     </div>
   );
 }
