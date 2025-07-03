@@ -13,6 +13,23 @@ enum UserRole {
   USER
 }
 
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  REVOKED
+}
+
+enum RoomRole {
+  OWNER
+  MEMBER
+}
+
+enum RoomAccess {
+  VIEW
+  EDIT
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -21,12 +38,94 @@ model User {
   image         String?
   password      String?
   role          UserRole  @default(USER)
-  accounts      Account[]
 
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  accounts Account[]
+  groups   UserGroup[]
+  rooms    UserRoom[]  @relation(name: "UserRoom")
+  owner    Group[]
+  inviter  UserRoom[]  @relation(name: "Inviter")
+
   isTwoFactorEnabled    Boolean                @default(false)
   TwoFactorConfirmation TwoFactorConfirmation?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  @@index([id])
+  @@index([email])
+}
+
+model Group {
+  id      String @id @default(cuid())
+  name    String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+
+  users UserGroup[]
+  rooms GroupRoom[]
+
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@index([name])
+}
+
+model Room {
+  id   String @id @default(cuid())
+  name String
+
+  users  UserRoom[]
+  groups GroupRoom[]
+
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@index([name])
+}
+
+model UserRoom {
+  user   User   @relation(name: "UserRoom", fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId String
+
+  access RoomAccess @default(VIEW)
+  role   RoomRole   @default(MEMBER)
+
+  inviter   User?         @relation(name: "Inviter", fields: [invitedBy], references: [id], onDelete: Cascade)
+  invitedBy String?
+  status    InviteStatus @default(PENDING)
+  joinedAt  DateTime?
+
+  @@unique([userId, roomId])
+  @@index([userId])
+  @@index([roomId])
+}
+
+model GroupRoom {
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+  room    Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId  String
+
+  access RoomAccess @default(VIEW)
+  role   RoomRole   @default(MEMBER)
+
+  @@unique([groupId, roomId])
+  @@index([groupId])
+  @@index([roomId])
+}
+
+model UserGroup {
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, groupId])
+  @@index([userId])
+  @@index([groupId])
 }
 
 model Account {
