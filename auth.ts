@@ -5,6 +5,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import User from "./data/user";
 import TwoFactorConfirm from "./data/two-factor-conf";
 import Account from "./data/account";
+import { UserRole } from "@prisma/client";
 
 export const {
   // nested destructuring
@@ -75,8 +76,8 @@ export const {
 
       // token custom fields
       token.isOAuth = !!existingAcc;
-      token.role = existingUser.role;
-      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+      token.role = (existingUser.role ?? "USER") as UserRole;
+      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled ?? false;
 
       // console.log("JWT: ", token);
       return token;
@@ -95,11 +96,11 @@ export const {
         }
 
         if (token.role) {
-          session.user.role = token.role;
+          session.user.role = token.role as UserRole;
         }
 
         if (token.isTwoFactorEnabled) {
-          session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
+          session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
         }
 
         if (token.name) {
@@ -111,7 +112,7 @@ export const {
         }
 
         if (token.isOAuth) {
-          session.user.isOAuth = token.isOAuth;
+          session.user.isOAuth = token.isOAuth as boolean;
         }
       }
 
