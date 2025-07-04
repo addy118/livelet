@@ -3,7 +3,6 @@
 import PassResetToken from "@/data/pass-reset";
 import User from "@/data/user";
 import { db } from "@/lib/db";
-import { generatePassResetToken } from "@/lib/tokens";
 import { NewPassSchema } from "@/schemas";
 import bcrypt from "bcryptjs";
 import * as z from "zod";

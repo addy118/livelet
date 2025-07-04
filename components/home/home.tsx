@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
 import { ExtendedUser } from "@/next-auth";
 import { BaseRoom } from "@/types";
 import { RoomCard } from "../room-card";
@@ -14,7 +12,6 @@ export const HomePage = ({
   user: ExtendedUser;
   rooms: BaseRoom[];
 }) => {
-  const router = useRouter();
   console.log(user.id);
   console.log(rooms);
 
@@ -28,7 +25,7 @@ export const HomePage = ({
           ))}
         </div>
       ) : (
-        <p className="text-gray-400">You don't have any rooms</p>
+        <p className="text-gray-400">You don&apos;t have any rooms</p>
       )}
     </>
   );
