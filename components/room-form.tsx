@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -42,7 +42,7 @@ export const RoomForm = () => {
       process.env.NODE_ENV === "development"
         ? // dev data
           {
-            name: "Aditya Kirti",
+            name: "New Room",
             defaultAccess: "VIEW",
             users: [
               {
@@ -50,12 +50,7 @@ export const RoomForm = () => {
                 access: "VIEW",
               },
             ],
-            groups: [
-              {
-                id: "group-id",
-                access: "VIEW",
-              },
-            ],
+            groups: [],
           }
         : {
             name: "",
@@ -99,7 +94,7 @@ export const RoomForm = () => {
         if (data?.success) {
           form.reset();
           setSuccess(data?.success);
-          // router.push("/");
+          router.push("/");
         }
       } catch {
         setError("Something went wrong");

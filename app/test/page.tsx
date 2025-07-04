@@ -1,16 +1,14 @@
 import React from "react";
-import { Liveblocks } from "@liveblocks/node";
+// import { Liveblocks } from "@liveblocks/node";
 import { auth } from "@/auth";
-import { nanoid } from "nanoid";
-import { isEqual } from "@/lib/utils";
 import { db } from "@/lib/db";
 
 const { LIVEBLOCKS_SECRET_KEY } = process.env;
 if (!LIVEBLOCKS_SECRET_KEY) console.log("No secret key found.");
 
-const liveblocks = new Liveblocks({
-  secret: LIVEBLOCKS_SECRET_KEY!,
-});
+// const liveblocks = new Liveblocks({
+//   secret: LIVEBLOCKS_SECRET_KEY!,
+// });
 
 const Test = async () => {
   const session = await auth();
@@ -20,7 +18,7 @@ const Test = async () => {
   console.log(user.id);
   if (!user.id) return;
 
-  const roomId = "room-cmbxww91t0002e60us1pqjy52-Daru5ztmYm";
+  // const roomId = "room-cmbxww91t0002e60us1pqjy52-Daru5ztmYm";
 
   const dbUser = await db.user.findFirst({
     where: { id: user.id },

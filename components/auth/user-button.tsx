@@ -9,24 +9,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { FaUser } from "react-icons/fa";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { LogoutButton } from "./logout-button";
-import {
-  Globe,
-  LogOut,
-  Server,
-  Settings,
-  ShieldIcon as ShieldUser,
-  Users,
-} from "lucide-react";
+import { IdCard, LogOut, Settings, Users } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { ExtendedUser } from "@/next-auth";
+import { copy } from "@/lib/utils";
 
 export const UserButton = ({ user }: { user: ExtendedUser | undefined }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const menuItems = [{ label: "Settings", icon: Settings, path: "/settings" }];
+  if (!user || !user.id) return <p>No user found</p>;
 
-  !!user && menuItems.push({ label: "Groups", icon: Users, path: "/groups" });
+  const menuItems = [
+    { id: 1, label: "Settings", icon: Settings, path: "/settings" },
+  ];
+
+  if (!!user) {
+    menuItems.push({ id: 2, label: "Groups", icon: Users, path: "/groups" });
+    menuItems.push({ id: 3, label: "Copy User ID", icon: IdCard, path: "" });
+  }
 
   return (
     <DropdownMenu>
@@ -51,11 +52,11 @@ export const UserButton = ({ user }: { user: ExtendedUser | undefined }) => {
           <p className="text-[#888888] text-xs truncate">{user?.email}</p>
         </div>
 
-        {menuItems.map(({ label, icon: Icon, path }) => (
+        {menuItems.map(({ id, label, icon: Icon, path }) => (
           <span
             key={path}
             className="cursor-pointer"
-            onClick={() => router.push(path)}
+            onClick={() => (id !== 3 ? router.push(path) : copy(user.id))}
           >
             <DropdownMenuItem
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-smooth cursor-pointer focus:outline-none ${
