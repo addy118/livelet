@@ -3,9 +3,8 @@
 import { auth } from "@/auth";
 import Room from "@/data/room";
 import { createCollabRoom } from "@/lib/room";
+import { toLiveblocksData } from "@/lib/utils";
 import { roomSchema, RoomSchema } from "@/schemas";
-import { AccessTuple } from "@/types";
-import { Prisma } from "@prisma/client";
 
 export const room = async (values: RoomSchema) => {
   const validatedFields = roomSchema.safeParse(values);
@@ -25,25 +24,12 @@ export const room = async (values: RoomSchema) => {
     if (!user || !user.id) return { error: "No user found" };
 
     // transform data for liveblocks room creation
-    const accessMap: Record<"VIEW" | "EDIT", AccessTuple> = {
-      VIEW: ["room:read", "room:presence:write"],
-      EDIT: ["room:write"],
-    } as const;
-
-    const defaultAccesses = accessMap[defaultAccess];
-
-    const groupsAccesses: Record<string, AccessTuple> = {};
-    groups?.forEach((group) => {
-      groupsAccesses[group.id] = [...accessMap[group.access]];
-    });
-
-    const usersAccesses: Record<string, AccessTuple> = {};
-    // add the owner itself
-    usersAccesses[user.id] = ["room:write"];
-    // add form body users
-    users?.forEach((formUser) => {
-      usersAccesses[formUser.id] = [...accessMap[formUser.access]];
-    });
+    const { defaultAccesses, groupsAccesses, usersAccesses } = toLiveblocksData(
+      user.id,
+      defaultAccess,
+      groups,
+      users
+    );
 
     // create liveblocks room
     const room = await createCollabRoom(
@@ -53,18 +39,12 @@ export const room = async (values: RoomSchema) => {
     );
 
     // store room metadata in db
-    const dbRoom = await Room.create(
-      room.id,
-      name,
-      user.id,
-      defaultAccess,
-      groups,
-      users
-    );
+    await Room.create(room.id, name, user.id, defaultAccess, groups, users);
 
     return { success: "Room created successfully" };
   } catch (error) {
     if (error instanceof Error) {
+      console.error("Error in /actions/room.ts: ", error.message);
       return { error: error.message };
     }
     return { error: "Unknown error while submitting form" };
