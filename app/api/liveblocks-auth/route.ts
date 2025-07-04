@@ -1,4 +1,5 @@
 //liveblocks.io/docs/authentication
+import User from "@/data/user";
 import { currentUser } from "@/lib/auth";
 import { Liveblocks } from "@liveblocks/node"
 import { NextRequest } from "next/server";
@@ -16,17 +17,26 @@ export interface UserInfo {
   picture: string;
 }
 
+export const dynamic = 'force-dynamic';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function POST(req: NextRequest) {
   // get user id from the database
   const user = await currentUser();
   if (!user || !user.id) return new Response("Unauthorized", { status: 401 });
+  
+  // get all the groups of the user
+  const dbGroups = await User.getGroups(user.id);
+  const groups: string[] = [];
+  dbGroups.forEach((obj) => groups.push(obj.groupId));
+  console.log("User groups: ", groups);
 
+  // set a color for user
   const color = LIVEBLOCKS_COLORS[Math.floor(Math.random() * 8)];
 
   const { status, body } = await liveblocks.identifyUser({
     userId: user.id,
-    groupIds: []
+    groupIds: groups
   }, 
   {
     // user meta-data
@@ -34,17 +44,6 @@ export async function POST(req: NextRequest) {
       name: user.name ?? "Guest",
       avatar: user.image ?? `https://liveblocks.io/avatars/avatar-${Math.floor(Math.random() * 8) + 1}.png`,
       colors: [color, color, color]
-    }
-  })
-
-  // create a room w/ different permissions
-  const room = await liveblocks.createRoom(`${user.id}-room-3`, {
-    defaultAccesses: ["room:read", "room:presence:write"],
-    groupsAccesses: {
-      "custom-group-id": ["room:write"],
-    },
-    usersAccesses: {
-      [user.id]: ["room:write"],
     }
   })
 

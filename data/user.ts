@@ -28,6 +28,24 @@ class User {
       }
     }
   };
+
+  static getGroups = async (userId: string) => {
+    try {
+      const groups = await db.userGroup.findMany({ 
+        where: { userId }, 
+        select: { groupId: true } 
+      })
+      
+      return groups;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error in User.getGroups: ", error.stack);
+        throw new Error(error.message);
+      } else {
+        throw new Error("Couldn't find groups by user ID.");
+      }
+    }
+  };
 }
 
 export default User;

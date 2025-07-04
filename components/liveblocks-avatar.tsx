@@ -4,9 +4,9 @@ import { useOthers, useSelf } from "@liveblocks/react/suspense";
 export function Avatars() {
   const users = useOthers();
   const currentUser = useSelf();
-  console.log("from avatars()");
-  console.log("others:", users.map(u => u.info));
-  console.log("self:", currentUser?.info);
+  // console.log("from avatars()");
+  // console.log("others:", users.map(u => u.info));
+  // console.log("self:", currentUser?.info);
 
   return (
     <div className=" flex px-3">

@@ -3,13 +3,16 @@
 import React from "react";
 import { UserButton } from "@/components/auth/user-button";
 import { useRouter } from "next/navigation";
+import { SignedNav } from "./signed-navbar";
+import { ExtendedUser } from "@/next-auth";
 
-export const Navbar = () => {
+export const Navbar = ({ user }: { user: ExtendedUser | undefined }) => {
   const router = useRouter();
+  // console.log("User authenticated: ", !!user);
 
   return (
     <nav className="sticky top-0 z-50 w-full">
-      <div className="glass bg-[#000000]/80 border-b border-[#333333]/50">
+      <div className="glass bg-[#000000] border-b border-[#333333]/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
@@ -20,8 +23,10 @@ export const Navbar = () => {
                 Livelet
               </h1>
             </div>
-            <div className="flex items-center">
-              <UserButton />
+
+            <div className="flex items-center space-x-4">
+              {!!user && <SignedNav />}
+              <UserButton user={user} />
             </div>
           </div>
         </div>

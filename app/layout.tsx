@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
-import { Navbar } from "./(protected)/_components/navbar";
+import { Navbar } from "./(general)/_components/navbar";
 import { Providers } from "./Providers";
 import "./globals.css";
 
@@ -17,6 +17,7 @@ export default async function RootLayout({
   children: ReactNode;
 }>) {
   const session = await auth();
+  const user = session?.user;
 
   return (
     <html lang="en" className="dark">
@@ -24,14 +25,14 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <Providers>
             <div className="min-h-screen w-full flex flex-col">
-              <Navbar />
+              <Navbar user={user} />
               <main className="flex-1 p-4 sm:p-6 lg:p-8">
                 <div className="w-full h-full">{children}</div>
               </main>
             </div>
           </Providers>
         </SessionProvider>
-      </body> 
+      </body>
     </html>
   );
 }

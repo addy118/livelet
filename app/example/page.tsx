@@ -1,16 +1,9 @@
 import React from "react";
-import { Room } from "../Room";
-import { CollaborativeEditor } from "@/components/collab-editor";
+import CollabRoom from "@/components/collab-room";
 
 const Example = () => {
   return (
-    <>
-      <main>
-        <Room>
-          <CollaborativeEditor />
-        </Room>
-      </main>
-    </>
+    <CollabRoom roomId="room-cmbxww91t0002e60us1pqjy52-Daru5ztmYm" />
   );
 };
 

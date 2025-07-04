@@ -1,4 +1,5 @@
 "use client";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +8,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { FaUser } from "react-icons/fa";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { LogoutButton } from "./logout-button";
 import {
   Globe,
@@ -15,20 +15,18 @@ import {
   Server,
   Settings,
   ShieldIcon as ShieldUser,
+  Users,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { ExtendedUser } from "@/next-auth";
 
-export const UserButton = () => {
-  const user = useCurrentUser();
+export const UserButton = ({ user }: { user: ExtendedUser | undefined }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const menuItems = [
-    { label: "Admin", icon: ShieldUser, path: "/admin" },
-    { label: "Settings", icon: Settings, path: "/settings" },
-    { label: "Server", icon: Server, path: "/server" },
-    { label: "Client", icon: Globe, path: "/client" },
-  ];
+  const menuItems = [{ label: "Settings", icon: Settings, path: "/settings" }];
+
+  !!user && menuItems.push({ label: "Groups", icon: Users, path: "/groups" });
 
   return (
     <DropdownMenu>
