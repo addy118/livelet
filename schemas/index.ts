@@ -1,5 +1,30 @@
 import * as z from "zod";
 
+export const roomSchema = z.object({
+  name: z.string().min(1, "Room name is required"),
+  defaultAccess: z.enum(["VIEW", "EDIT"]),
+
+  users: z
+    .array(
+      z.object({
+        id: z.string().min(1, "Room ID should be of length 10"),
+        access: z.enum(["VIEW", "EDIT"]),
+      })
+    )
+    .optional(),
+
+  groups: z
+    .array(
+      z.object({
+        id: z.string().min(1, "Group ID should be of length 10"),
+        access: z.enum(["VIEW", "EDIT"]),
+      })
+    )
+    .optional(),
+});
+
+export type RoomSchema = z.infer<typeof roomSchema>;
+
 export const LoginSchema = z.object({
   email: z.string().email({
     message: "Email is required",

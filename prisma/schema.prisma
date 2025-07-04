@@ -39,11 +39,12 @@ model User {
   password      String?
   role          UserRole  @default(USER)
 
-  accounts Account[]
-  groups   UserGroup[]
-  rooms    UserRoom[]  @relation(name: "UserRoom")
-  owner    Group[]
-  inviter  UserRoom[]  @relation(name: "Inviter")
+  accounts   Account[]
+  groups     UserGroup[]
+  rooms      UserRoom[]  @relation(name: "UserRoom")
+  groupOwner Group[]
+  roomOwner  Room[]
+  inviter    UserRoom[]  @relation(name: "Inviter")
 
   isTwoFactorEnabled    Boolean                @default(false)
   TwoFactorConfirmation TwoFactorConfirmation?
@@ -63,21 +64,24 @@ model Group {
   users UserGroup[]
   rooms GroupRoom[]
 
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([name])
 }
 
 model Room {
-  id   String @id @default(cuid())
-  name String
+  id      String     @id
+  name    String
+  owner   User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+  default RoomAccess @default(VIEW)
 
   users  UserRoom[]
   groups GroupRoom[]
 
-  createdAt DateTime
-  updatedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([name])
 }
@@ -91,7 +95,7 @@ model UserRoom {
   access RoomAccess @default(VIEW)
   role   RoomRole   @default(MEMBER)
 
-  inviter   User?         @relation(name: "Inviter", fields: [invitedBy], references: [id], onDelete: Cascade)
+  inviter   User?        @relation(name: "Inviter", fields: [invitedBy], references: [id], onDelete: Cascade)
   invitedBy String?
   status    InviteStatus @default(PENDING)
   joinedAt  DateTime?
@@ -108,7 +112,6 @@ model GroupRoom {
   roomId  String
 
   access RoomAccess @default(VIEW)
-  role   RoomRole   @default(MEMBER)
 
   @@unique([groupId, roomId])
   @@index([groupId])
