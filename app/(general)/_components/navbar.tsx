@@ -8,7 +8,6 @@ import { ExtendedUser } from "@/next-auth";
 
 export const Navbar = ({ user }: { user: ExtendedUser | undefined }) => {
   const router = useRouter();
-  // console.log("User authenticated: ", !!user);
 
   return (
     <nav className="sticky top-0 z-50 w-full">

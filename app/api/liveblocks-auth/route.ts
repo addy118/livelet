@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   const dbGroups = await User.getGroups(user.id);
   const groups: string[] = [];
   dbGroups.forEach((obj) => groups.push(obj.groupId));
-  console.log("User groups: ", groups);
+  // console.log("User groups: ", groups);
 
   // set a color for user
   const color = LIVEBLOCKS_COLORS[Math.floor(Math.random() * 8)];

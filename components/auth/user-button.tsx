@@ -18,7 +18,7 @@ export const UserButton = ({ user }: { user: ExtendedUser | undefined }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  if (!user || !user.id) return <p>No user found</p>;
+  if (!user || !user.id) return;
 
   const menuItems = [
     { id: 1, label: "Settings", icon: Settings, path: "/settings" },

@@ -1,19 +1,15 @@
 "use client";
 
 import React from "react";
-import { ExtendedUser } from "@/next-auth";
 import { BaseRoom } from "@/types";
 import { RoomCard } from "../room-card";
 
 export const HomePage = ({
-  user,
   rooms,
 }: {
-  user: ExtendedUser;
   rooms: BaseRoom[];
 }) => {
-  console.log(user.id);
-  console.log(rooms);
+  console.log("home page");
 
   return (
     <>

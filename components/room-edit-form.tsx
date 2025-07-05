@@ -25,11 +25,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { newRoom } from "@/actions/room";
+import { updateRoom } from "@/actions/room";
 import { useFieldArray } from "react-hook-form";
 import { Trash2 } from "lucide-react";
+import { RoomDB } from "@/types";
+import { RoomAccess } from "@prisma/client";
 
-export const RoomForm = () => {
+export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
   const router = useRouter();
 
   const [error, setError] = useState<string | undefined>("");
@@ -38,27 +40,25 @@ export const RoomForm = () => {
 
   const form = useForm<RoomSchema>({
     resolver: zodResolver(roomSchema),
-    defaultValues:
-      process.env.NODE_ENV === "development"
-        ? // dev data
-          {
-            name: "New Room",
-            defaultAccess: "VIEW",
-            users: [
-              {
-                id: "cmcosadyt0000ors39rpl9wt5",
-                access: "VIEW",
-              },
-            ],
-            groups: [],
-          }
-        : {
-            name: "",
-            defaultAccess: "VIEW",
-            users: [],
-            groups: [],
-          },
+
+    // populate with previous room values
+    defaultValues: {
+      name: roomData.name,
+      defaultAccess: roomData.default,
+      users: roomData.users.map(({ userId, access }) => ({
+        id: userId,
+        access: access as RoomAccess,
+      })),
+      groups: roomData.groups.map(({ groupId, access }) => ({
+        id: groupId,
+        access: access as RoomAccess,
+      })),
+    },
   });
+
+  const watchedUsers = form.watch("users") || [
+    { id: "", access: "VIEW" as RoomAccess },
+  ];
 
   const { control } = form;
   const { fields, append, remove } = useFieldArray({
@@ -82,8 +82,7 @@ export const RoomForm = () => {
     startTransition(async () => {
       try {
         // call your form action
-        console.log("Raw values: ", values);
-        const data = await newRoom(values);
+        const data = await updateRoom(values);
         if (!data) return;
 
         if (data?.error) {
@@ -179,9 +178,6 @@ export const RoomForm = () => {
                     name={`groups.${index}.id`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        {/* <FormLabel className="text-xs text-white">
-                          Group ID
-                        </FormLabel> */}
                         <FormControl>
                           <Input placeholder="group-id" {...field} />
                         </FormControl>
@@ -195,9 +191,6 @@ export const RoomForm = () => {
                     name={`groups.${index}.access`}
                     render={({ field }) => (
                       <FormItem className="w-32">
-                        {/* <FormLabel className="text-xs text-white">
-                          Access
-                        </FormLabel> */}
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -254,9 +247,6 @@ export const RoomForm = () => {
                     name={`users.${index}.id`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        {/* <FormLabel className="text-xs text-white">
-                          Room ID
-                        </FormLabel> */}
                         <FormControl>
                           <Input placeholder="room-id" {...field} />
                         </FormControl>
@@ -270,9 +260,6 @@ export const RoomForm = () => {
                     name={`users.${index}.access`}
                     render={({ field }) => (
                       <FormItem className="w-32">
-                        {/* <FormLabel className="text-xs text-white">
-                          Access
-                        </FormLabel> */}
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -295,8 +282,12 @@ export const RoomForm = () => {
                   <Button
                     type="button"
                     variant="ghost"
+                    disabled={watchedUsers[index]?.id === roomData.ownerId}
                     size="icon"
-                    onClick={() => remove(index)}
+                    onClick={() =>
+                      watchedUsers[index]?.id !== roomData.ownerId &&
+                      remove(index)
+                    }
                     className="text-red-500 hover:text-red-700"
                   >
                     <Trash2 className="w-4 h-4" />

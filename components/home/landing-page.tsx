@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { Poppins } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -10,6 +9,7 @@ const font = Poppins({
 });
 
 export const LandingPage = () => {
+  console.log("landing page");
   return (
     <div className="space-y-6 text-center">
       <h1

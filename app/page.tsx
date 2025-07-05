@@ -1,21 +1,21 @@
-// "use client";
-
 import React from "react";
-// import { useSession } from "next-auth/react";
 import { HomePage } from "@/components/home/home";
 import { LandingPage } from "@/components/home/landing-page";
-import { auth } from "@/auth";
 import User from "@/data/user";
+import { currentUser } from "@/lib/auth";
 
 export default async function Home() {
-  const session = await auth();
-  const user = session?.user;
+  const user = await currentUser();
   if (!user || !user.id) return;
   const rooms = await User.getRooms(user.id);
+  console.log("main page");
+  console.log(user);
+
+  console.log(user ? "home page" : "landing page");
 
   return (
     <main className="flex h-full flex-col items-center justify-center">
-      {session ? <HomePage user={session?.user} rooms={rooms} /> : <LandingPage />}
+      {user ? <HomePage rooms={rooms} /> : <LandingPage />}
     </main>
   );
 }

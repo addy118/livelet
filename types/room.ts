@@ -13,6 +13,24 @@ export interface BaseRoom {
   createdAt: Date;
 }
 
+export interface RoomDB {
+  default: RoomAccess;
+  name: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  ownerId: string;
+  users: {
+    userId: string;
+    access: string;
+    role: string;
+  }[];
+  groups: {
+    groupId: string;
+    access: string;
+  }[]
+}
+
 export const accessMap: Record<"VIEW" | "EDIT", AccessTuple> = {
   VIEW: ["room:read", "room:presence:write"],
   EDIT: ["room:write"],
