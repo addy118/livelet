@@ -32,8 +32,9 @@ export const UserButton = ({ user }: { user: ExtendedUser | undefined }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <Avatar className="w-10 h-10 border-2 border-[#333333] hover:border-[#555555] transition-smooth">
-          <AvatarImage src={user?.image || ""} className="object-cover" />
+        <Avatar className="w-9 h-9 border-2 border-[#333333] hover:border-[#555555] transition-smooth">
+          <AvatarImage 
+          src={user?.image || ""} className="object-cover" />
           <AvatarFallback className="bg-[#222222] ">
             <FaUser className="text-[#ffffff] w-4 h-4" />
           </AvatarFallback>

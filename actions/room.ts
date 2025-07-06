@@ -9,6 +9,7 @@ import {
 } from "@/lib/room";
 import { toLiveblocksData } from "@/lib/utils";
 import { roomSchema, RoomSchema } from "@/schemas";
+import { RoomAccess } from "@prisma/client";
 
 export const newRoom = async (values: RoomSchema) => {
   const validatedFields = roomSchema.safeParse(values);
@@ -25,6 +26,9 @@ export const newRoom = async (values: RoomSchema) => {
     // form action logic
     const user = await currentUser();
     if (!user || !user.id) return { error: "No user found" };
+
+    // add current user to room
+    users?.push({ id: user.id, access: "EDIT" as RoomAccess });
 
     // transform data for liveblocks room creation
     const { defaultAccesses, groupsAccesses, usersAccesses } = toLiveblocksData(

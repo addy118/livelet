@@ -36,8 +36,6 @@ export const toLiveblocksData = (
   });
 
   const usersAccesses: Record<string, AccessTuple> = {};
-  // add the owner itself
-  usersAccesses[userId] = ["room:write"];
   // add form body users
   users?.forEach((formUser) => {
     // TODO: check whether user.id exists in db

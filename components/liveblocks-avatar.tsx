@@ -1,17 +1,15 @@
 import { useOthers, useSelf } from "@liveblocks/react/suspense";
-// import type { UserInfo } from "@/app/api/liveblocks-auth/route";
+import Image from "next/image";
 
 export function Avatars() {
   const users = useOthers();
   const currentUser = useSelf();
-  // console.log("from avatars()");
-  // console.log("others:", users.map(u => u.info));
-  // console.log("self:", currentUser?.info);
 
   return (
     <div className=" flex px-3">
       {users.map(({ connectionId, info }) => {
         const userInfo = info;
+        console.log(userInfo.avatar);
         return (
           <Avatar
             key={connectionId}
@@ -37,16 +35,21 @@ export function Avatars() {
 }
 
 export function Avatar({ picture, name }: { picture: string; name: string }) {
+  const [firstName, lastName] = name.split(" ");
+  const fallbackImg = `https://ui-avatars.com/api/?name=${firstName}+${lastName ? lastName : ""}&background=111&color=fff`;
+  console.log(fallbackImg);
+
   return (
     <div
-      className="flex justify-center items-center relative border-4 border-white rounded-full w-[42px] h-[42px] bg-gray-400 -ml-3 group"
+      className="flex justify-center items-center relative border-2 border-gray-800 rounded-full w-[42px] h-[42px] bg-gray-400 -ml-3 group"
       data-tooltip={name}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={picture || "/placeholder.svg"}
+      <Image
+        src={picture || fallbackImg}
         alt="Avatar"
-        className="w-full h-full rounded-full"
+        width={42}
+        height={42}
+        className="w-full h-full rounded-full object-cover"
         data-tooltip={name}
       />
       <div className="absolute top-full opacity-0 group-hover:opacity-100 transition-opacity duration-150 ease-in-out py-1 px-2.5 text-white text-xs rounded-lg mt-2.5 z-10 bg-black whitespace-nowrap pointer-events-none">

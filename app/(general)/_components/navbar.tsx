@@ -12,9 +12,9 @@ export const Navbar = ({ user }: { user: ExtendedUser | undefined }) => {
   return (
     <nav className="sticky top-0 z-50 w-full">
       <div className="glass bg-[#000000] border-b border-[#333333]/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
+        <div className="">
+          <div className="flex justify-between items-center h-16 px-6 md:px-8">
+            <div className="flex items-center justify-between space-x-0">
               <h1
                 className="text-xl font-bold cursor-pointer text-[#ffffff] tracking-tight"
                 onClick={() => router.push("/")}
