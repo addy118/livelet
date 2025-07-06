@@ -6,7 +6,7 @@ import { AccessTuple } from "@/types";
 import { currentUser } from "./auth";
 
 const { LIVEBLOCKS_SECRET_KEY } = process.env;
-if (!LIVEBLOCKS_SECRET_KEY) console.log("No secret key found.");
+if (!LIVEBLOCKS_SECRET_KEY) console.log("NO SECRET KEY FOUND");
 
 const liveblocks = new Liveblocks({
   secret: LIVEBLOCKS_SECRET_KEY!,

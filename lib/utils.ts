@@ -15,7 +15,7 @@ export const isEqual = <T>(arr1: T[], arr2: T[]): boolean => {
 
 export const copy = (something: string | undefined): void => {
   if (!something) return;
-  console.log(something);
+  // console.log(something);
   navigator.clipboard.writeText(something);
   // TODO: add beautiful toast message instead of alert
   alert("User ID copied to clipboard");

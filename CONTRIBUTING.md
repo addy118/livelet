@@ -45,7 +45,13 @@ npm install
   git pull --rebase origin master
   ```
 
-4. After resolving any conflicts, push your changes:
+4. Check for production errors before pushing:
+
+  ```bash
+  npm run prod:lint
+  ```
+
+5. After resolving any conflicts and errors, push your changes:
 
   ```bash
   git push origin master

@@ -67,7 +67,7 @@ export const updateRoom = async (values: RoomSchema, roomId: string) => {
 
   try {
     // form action logic
-    console.log(values);
+    // console.log(values);
     const user = await currentUser();
     if (!user || !user.id) return { error: "No user found" };
 
@@ -87,8 +87,8 @@ export const updateRoom = async (values: RoomSchema, roomId: string) => {
       usersAccesses
     );
 
-    console.log("updated liveblocks room:");
-    console.log(room);
+    // console.log("updated liveblocks room:");
+    // console.log(room);
 
     // store room metadata in db
     await Room.upsert(room.id, name, user.id, defaultAccess, groups, users);
@@ -108,7 +108,7 @@ export const updateRoom = async (values: RoomSchema, roomId: string) => {
 
 export const deleteRoom = async (roomId: string) => {
   try {
-    console.log(`deleting room ${roomId}`);
+    // console.log(`deleting room ${roomId}`);
 
     // delete liveblocks room
     await deleteCollabRoom(roomId);

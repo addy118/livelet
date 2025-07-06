@@ -17,7 +17,7 @@ export const LoginButton = ({
   const router = useRouter();
 
   const onClick = () => {
-    console.log("LOGIN BUTTON CLIKED");
+    // console.log("LOGIN BUTTON CLIKED");
     router.push("/login");
   };
 

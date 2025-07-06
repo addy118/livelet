@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "ts:lint": "tsc --noEmit",
-    "prod:lint": "next build && Remove-Item -Recurse -Force .next/"
+    "prod:lint": "next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.1",

@@ -5,8 +5,6 @@ import { BaseRoom } from "@/types";
 import { RoomCard } from "../room/room-card";
 
 export const HomePage = ({ rooms }: { rooms: BaseRoom[] }) => {
-  console.log("home page");
-
   return (
     <>
       <h1 className="text-xl font-bold pb-6">My Rooms</h1>

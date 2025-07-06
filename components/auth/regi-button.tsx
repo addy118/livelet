@@ -19,7 +19,7 @@ export const RegiButton = ({
   const router = useRouter();
 
   const onClick = () => {
-    console.log("REGISTER BUTTON CLIKED");
+    // console.log("REGISTER BUTTON CLIKED");
     router.push("/register");
   };
 
