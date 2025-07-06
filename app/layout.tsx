@@ -22,6 +22,10 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="icon" href="/code.svg" />
+      </head>
+
       <body className="min-h-screen bg-gradient-to-br from-[#000000] via-[#111111] to-[#000000]">
         <SessionProvider session={session}>
           <Providers>
