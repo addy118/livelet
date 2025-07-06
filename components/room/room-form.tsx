@@ -24,10 +24,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 import { newRoom } from "@/actions/room";
 import { useFieldArray } from "react-hook-form";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const RoomForm = () => {
   const router = useRouter();
@@ -47,7 +48,7 @@ export const RoomForm = () => {
             users: [
               {
                 id: "cmcosadyt0000ors39rpl9wt5",
-                access: "VIEW",
+                access: "EDIT",
               },
             ],
             groups: [],
@@ -94,6 +95,7 @@ export const RoomForm = () => {
         if (data?.success) {
           form.reset();
           setSuccess(data?.success);
+          toast.success("Room created successfully");
           router.push("/");
         }
       } catch {
@@ -315,7 +317,7 @@ export const RoomForm = () => {
               disabled={isPending}
               className="w-full bg-[#ffffff] hover:bg-[#cccccc] text-[#000000] font-semibold transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Room
+              {isPending ? "Creating room ..." : "Create Room"}
             </Button>
           </div>
         </form>

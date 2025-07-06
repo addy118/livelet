@@ -5,9 +5,10 @@ import type { ReactNode } from "react";
 import { Navbar } from "./(general)/_components/navbar";
 import { Providers } from "./Providers";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "Livelet - Secure Authentication",
+  title: "Livelet",
   description: "Modern authentication system built with Next.js",
 };
 
@@ -32,6 +33,7 @@ export default async function RootLayout({
             </div>
           </Providers>
         </SessionProvider>
+        <Toaster />
       </body>
     </html>
   );

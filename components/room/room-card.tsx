@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, CardFooter, CardHeader } from "./ui/card";
+import { Card, CardFooter, CardHeader } from "../ui/card";
 import { BaseRoom } from "@/types";
 import { useRouter } from "next/navigation";
 import { ArrowRightIcon } from "lucide-react";

@@ -2,8 +2,8 @@
 
 import { Liveblocks, LiveblocksError, RoomData } from "@liveblocks/node";
 import { nanoid } from "nanoid";
-import { auth } from "@/auth";
 import { AccessTuple } from "@/types";
+import { currentUser } from "./auth";
 
 const { LIVEBLOCKS_SECRET_KEY } = process.env;
 if (!LIVEBLOCKS_SECRET_KEY) console.log("No secret key found.");
@@ -18,8 +18,7 @@ export const createCollabRoom = async (
   usersAccesses: Record<string, AccessTuple>
 ): Promise<RoomData> => {
   try {
-    const session = await auth();
-    const user = session?.user;
+    const user = await currentUser();
     if (!user || !user.id) throw new Error("No user found");
 
     const roomId = nanoid(10);
@@ -54,16 +53,15 @@ export const createCollabRoom = async (
 };
 
 export const updateCollabRoom = async (
+  roomId: string,
   defaultAccesses: AccessTuple,
   groupsAccesses: Record<string, AccessTuple>,
   usersAccesses: Record<string, AccessTuple>
 ): Promise<RoomData> => {
   try {
-    const session = await auth();
-    const user = session?.user;
+    const user = await currentUser();
     if (!user || !user.id) throw new Error("No user found");
 
-    const roomId = nanoid(10);
     const room = await liveblocks.updateRoom(roomId, {
       defaultAccesses,
       groupsAccesses,
@@ -90,6 +88,35 @@ export const updateCollabRoom = async (
       throw new Error(error.message);
     } else {
       throw new Error("Unknown error in updating the room");
+    }
+  }
+};
+
+export const deleteCollabRoom = async (roomId: string) => {
+  try {
+    await liveblocks.deleteRoom(roomId);
+  } catch (error) {
+    if (error instanceof LiveblocksError) {
+      console.error(
+        `Liveblocks error in deleting the room: ${error.status} - ${error.message}`
+      );
+      switch (error.status) {
+        case 403:
+          throw new Error("You don't have access to this room");
+
+        default:
+          throw new Error(
+            "Liveblocks error in deleting the room: " + error.message
+          );
+      }
+    } else if (error instanceof Error) {
+      console.error(
+        "Error in deleting the room at /lib/room.ts: ",
+        error.message
+      );
+      throw new Error(error.message);
+    } else {
+      throw new Error("Unknown error in deleting the room");
     }
   }
 };

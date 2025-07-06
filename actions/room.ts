@@ -2,7 +2,11 @@
 
 import Room from "@/data/room";
 import { currentUser } from "@/lib/auth";
-import { createCollabRoom, updateCollabRoom } from "@/lib/room";
+import {
+  createCollabRoom,
+  deleteCollabRoom,
+  updateCollabRoom,
+} from "@/lib/room";
 import { toLiveblocksData } from "@/lib/utils";
 import { roomSchema, RoomSchema } from "@/schemas";
 
@@ -50,7 +54,7 @@ export const newRoom = async (values: RoomSchema) => {
   }
 };
 
-export const updateRoom = async (values: RoomSchema) => {
+export const updateRoom = async (values: RoomSchema, roomId: string) => {
   const validatedFields = roomSchema.safeParse(values);
 
   if (!validatedFields.success) return { error: "Invalid Fields" };
@@ -63,6 +67,7 @@ export const updateRoom = async (values: RoomSchema) => {
 
   try {
     // form action logic
+    console.log(values);
     const user = await currentUser();
     if (!user || !user.id) return { error: "No user found" };
 
@@ -74,12 +79,16 @@ export const updateRoom = async (values: RoomSchema) => {
       users
     );
 
-    // create liveblocks room
+    // update liveblocks room
     const room = await updateCollabRoom(
+      roomId,
       defaultAccesses,
       groupsAccesses,
       usersAccesses
     );
+
+    console.log("updated liveblocks room:");
+    console.log(room);
 
     // store room metadata in db
     await Room.upsert(room.id, name, user.id, defaultAccess, groups, users);
@@ -94,5 +103,28 @@ export const updateRoom = async (values: RoomSchema) => {
       return { error: error.message };
     }
     return { error: "Unknown error while submitting room modification form" };
+  }
+};
+
+export const deleteRoom = async (roomId: string) => {
+  try {
+    console.log(`deleting room ${roomId}`);
+
+    // delete liveblocks room
+    await deleteCollabRoom(roomId);
+
+    // delete liveblocks room metadata from db
+    await Room.delete(roomId);
+
+    return { success: "Room deleted" };
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(
+        "Error in deleteRoom() at /actions/room.ts: ",
+        error.message
+      );
+      return { error: error.message };
+    }
+    return { error: "Unknown error while deleting room" };
   }
 };

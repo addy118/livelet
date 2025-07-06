@@ -1,4 +1,3 @@
-import React from "react";
 import { HomePage } from "@/components/home/home";
 import { LandingPage } from "@/components/home/landing-page";
 import User from "@/data/user";
@@ -6,16 +5,19 @@ import { currentUser } from "@/lib/auth";
 
 export default async function Home() {
   const user = await currentUser();
-  if (!user || !user.id) return;
-  const rooms = await User.getRooms(user.id);
-  console.log("main page");
-  console.log(user);
+  if (!user || !user.id) {
+    return (
+      <main className="flex h-full flex-col items-center justify-center">
+        <LandingPage />
+      </main>
+    );
+  }
 
-  console.log(user ? "home page" : "landing page");
+  const rooms = await User.getRooms(user.id);
 
   return (
     <main className="flex h-full flex-col items-center justify-center">
-      {user ? <HomePage rooms={rooms} /> : <LandingPage />}
+      <HomePage rooms={rooms} />
     </main>
   );
 }

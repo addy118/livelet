@@ -24,12 +24,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 import { updateRoom } from "@/actions/room";
 import { useFieldArray } from "react-hook-form";
 import { Trash2 } from "lucide-react";
 import { RoomDB } from "@/types";
 import { RoomAccess } from "@prisma/client";
+import { toast } from "sonner";
 
 export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
   const router = useRouter();
@@ -82,7 +83,7 @@ export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
     startTransition(async () => {
       try {
         // call your form action
-        const data = await updateRoom(values);
+        const data = await updateRoom(values, roomData.id);
         if (!data) return;
 
         if (data?.error) {
@@ -93,7 +94,8 @@ export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
         if (data?.success) {
           form.reset();
           setSuccess(data?.success);
-          router.push("/");
+          toast.success("Room updated successfully!");
+          router.push(`/room/${roomData.id}`);
         }
       } catch {
         setError("Something went wrong");
@@ -304,9 +306,9 @@ export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full bg-[#ffffff] hover:bg-[#cccccc] text-[#000000] font-semibold transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#ffffff] hover:bg-[#cccccc] text-[#000000] font-semibold transition-smooth disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              Create Room
+              {isPending ? "Updating..." : "Update Room"}
             </Button>
           </div>
         </form>

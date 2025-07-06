@@ -2,13 +2,9 @@
 
 import React from "react";
 import { BaseRoom } from "@/types";
-import { RoomCard } from "../room-card";
+import { RoomCard } from "../room/room-card";
 
-export const HomePage = ({
-  rooms,
-}: {
-  rooms: BaseRoom[];
-}) => {
+export const HomePage = ({ rooms }: { rooms: BaseRoom[] }) => {
   console.log("home page");
 
   return (
