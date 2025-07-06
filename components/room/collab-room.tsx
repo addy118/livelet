@@ -9,6 +9,7 @@ import Link from "next/link";
 import { RoomDB } from "@/types";
 import { ExtendedUser } from "@/next-auth";
 import { DeleteRoomButton } from "./delete-btn";
+import { useState } from "react";
 
 export default function CollabRoom({
   room,
@@ -17,7 +18,21 @@ export default function CollabRoom({
   room: RoomDB;
   user: ExtendedUser;
 }) {
+  const [isCopied, setIsCopied] = useState<boolean>();
   const isOwner = room.ownerId === user.id;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(room.id);
+      setIsCopied(true);
+
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy room ID: ", error);
+    }
+  };
 
   return (
     <main>
@@ -25,18 +40,24 @@ export default function CollabRoom({
         <Card className="p-4 font-semibold text-xl flex-row flex items-center justify-between mb-4">
           <p>{room.name}</p>
 
-          {isOwner && (
-            <div className="flex gap-2">
-              <Link href={`/room/${room.id}/edit`}>
-                <Button variant="outline">
-                  <Pencil className="h-4 w-4" />
-                  <p>Edit</p>
-                </Button>
-              </Link>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => handleCopy()}>
+              {isCopied ? "Copied!" : "Copy ID"}
+            </Button>
 
-              <DeleteRoomButton roomId={room.id} />
-            </div>
-          )}
+            {isOwner && (
+              <>
+                <Link href={`/room/${room.id}/edit`}>
+                  <Button variant="outline">
+                    <Pencil className="h-4 w-4" />
+                    <p>Edit</p>
+                  </Button>
+                </Link>
+
+                <DeleteRoomButton roomId={room.id} />
+              </>
+            )}
+          </div>
         </Card>
         <CollaborativeEditor />
       </Room>

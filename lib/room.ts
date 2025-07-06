@@ -1,9 +1,9 @@
 "use server";
 
 import { Liveblocks, LiveblocksError, RoomData } from "@liveblocks/node";
-import { nanoid } from "nanoid";
 import { AccessTuple } from "@/types";
 import { currentUser } from "./auth";
+import { genRoomId } from "./id";
 
 const { LIVEBLOCKS_SECRET_KEY } = process.env;
 if (!LIVEBLOCKS_SECRET_KEY) console.log("NO SECRET KEY FOUND");
@@ -21,7 +21,7 @@ export const createCollabRoom = async (
     const user = await currentUser();
     if (!user || !user.id) throw new Error("No user found");
 
-    const roomId = nanoid(10);
+    const roomId = genRoomId();
     const room = await liveblocks.createRoom(roomId, {
       defaultAccesses,
       groupsAccesses,
