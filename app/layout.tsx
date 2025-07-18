@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import type { ReactNode } from "react";
 import { Navbar } from "./(general)/_components/navbar";
 import { Providers } from "./Providers";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
   title: "Livelet",
   description: "Modern authentication system built with Next.js",
 };
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
 
 export default async function RootLayout({
   children,
