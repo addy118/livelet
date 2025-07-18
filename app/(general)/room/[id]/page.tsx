@@ -9,6 +9,7 @@ export default async function RoomPage({
   params: Promise<{ id: string }>;
 }) {
   const { id: roomId } = await params;
+  console.log(roomId);
   const user = await currentUser();
   if (!user) return <p>User unauthenticated</p>;
   const room = await dbRoom.getByRoomId(roomId);

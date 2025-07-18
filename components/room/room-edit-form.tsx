@@ -33,6 +33,7 @@ import { RoomAccess } from "@prisma/client";
 import { toast } from "sonner";
 
 export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
+  console.log(roomData);
   const router = useRouter();
 
   const [error, setError] = useState<string | undefined>("");
@@ -106,8 +107,8 @@ export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
   return (
     <CardWrapper
       headerLablel="Create a Collaborative Room!"
-      backButtonLabel="Return to Home"
-      backButtonHref="/"
+      backButtonLabel="Return to room"
+      backButtonHref={`/${roomData.id}`}
       showSocial={false}
     >
       <Form {...form}>
