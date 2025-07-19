@@ -108,7 +108,7 @@ export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
     <CardWrapper
       headerLablel="Create a Collaborative Room!"
       backButtonLabel="Return to room"
-      backButtonHref={`/${roomData.id}`}
+      backButtonHref={`/room/${roomData.id}`}
       showSocial={false}
     >
       <Form {...form}>

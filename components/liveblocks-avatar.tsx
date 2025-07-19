@@ -41,14 +41,14 @@ export function Avatar({ picture, name }: { picture: string; name: string }) {
 
   return (
     <div
-      className="flex justify-center items-center relative border-2 border-gray-800 rounded-full w-[42px] h-[42px] bg-gray-400 -ml-3 group"
+      className="flex justify-center items-center relative border-2 border-gray-800 rounded-full w-[32px] h-[32px] bg-gray-400 -ml-3 group"
       data-tooltip={name}
     >
       <Image
         src={picture || fallbackImg}
         alt="Avatar"
-        width={42}
-        height={42}
+        width={32}
+        height={32}
         className="w-full h-full rounded-full object-cover"
         data-tooltip={name}
       />

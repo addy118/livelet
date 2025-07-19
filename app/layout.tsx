@@ -37,7 +37,7 @@ export default async function RootLayout({
           <Providers>
             <div className="min-h-screen w-full flex flex-col">
               <Navbar user={user} />
-              <main className="flex-1 p-4 sm:p-6 lg:p-8">
+              <main className="flex-1">
                 <div className="w-full h-full">{children}</div>
               </main>
             </div>

@@ -8,7 +8,7 @@ export function Toolbar({ yUndoManager }: Props) {
   return (
     <div className="flex p-4 gap-1.5">
       <button
-        className="flex items-center justify-center cursor-pointer rounded-md h-8 w-8 bg-white text-gray-800 border-none shadow-[rgba(0,0,0,0.12)_0_4px_8px_0,rgba(0,0,0,0.02)_0_0_0_1px] hover:text-gray-900 hover:shadow-[rgba(0,0,0,0.16)_0_5px_8px_0,rgba(0,0,0,0.04)_0_0_0_1px] focus-visible:outline-offset-2"
+        className="flex items-center justify-center cursor-pointer rounded-md h-6 w-6 bg-white text-gray-800 border-none shadow-[rgba(0,0,0,0.12)_0_4px_8px_0,rgba(0,0,0,0.02)_0_0_0_1px] hover:text-gray-900 hover:shadow-[rgba(0,0,0,0.16)_0_5px_8px_0,rgba(0,0,0,0.04)_0_0_0_1px] focus-visible:outline-offset-2"
         onClick={() => yUndoManager.undo()}
         aria-label="undo"
       >
@@ -16,14 +16,12 @@ export function Toolbar({ yUndoManager }: Props) {
       </button>
 
       <button
-        className="flex items-center justify-center cursor-pointer rounded-md h-8 w-8 bg-white text-gray-800 border-none shadow-[rgba(0,0,0,0.12)_0_4px_8px_0,rgba(0,0,0,0.02)_0_0_0_1px] hover:text-gray-900 hover:shadow-[rgba(0,0,0,0.16)_0_5px_8px_0,rgba(0,0,0,0.04)_0_0_0_1px] focus-visible:outline-offset-2"
+        className="flex items-center justify-center cursor-pointer rounded-md h-6 w-6 bg-white text-gray-800 border-none shadow-[rgba(0,0,0,0.12)_0_4px_8px_0,rgba(0,0,0,0.02)_0_0_0_1px] hover:text-gray-900 hover:shadow-[rgba(0,0,0,0.16)_0_5px_8px_0,rgba(0,0,0,0.04)_0_0_0_1px] focus-visible:outline-offset-2"
         onClick={() => yUndoManager.redo()}
         aria-label="redo"
       >
         <RedoIcon />
       </button>
-
-      
     </div>
   );
 }

@@ -37,18 +37,22 @@ export default function CollabRoom({
   return (
     <main>
       <Room room={room}>
-        <Card className="p-4 font-semibold text-xl flex-row flex items-center justify-between mb-4">
+        <Card className="py-2 px-6 font-semibold text-md flex-row flex items-center justify-between">
           <p>{room.name}</p>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => handleCopy()}>
+            <Button
+              variant="outline"
+              className="h-8 text-xs"
+              onClick={() => handleCopy()}
+            >
               {isCopied ? "Copied!" : "Copy ID"}
             </Button>
 
             {isOwner && (
               <>
                 <Link href={`/room/${room.id}/edit`}>
-                  <Button variant="outline">
+                  <Button variant="outline" className="h-8 text-xs">
                     <Pencil className="h-4 w-4" />
                     <p>Edit</p>
                   </Button>

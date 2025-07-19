@@ -39,7 +39,7 @@ export const DeleteRoomButton = ({ roomId }: { roomId: string }) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className="h-8 text-xs">
           <span className="text-red-500">
             <Trash className="h-4 w-4" />
           </span>
