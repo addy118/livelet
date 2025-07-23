@@ -3,7 +3,7 @@ import * as Y from "yjs";
 import { useRoom, useSelf } from "@liveblocks/react/suspense";
 import { getYjsProviderForRoom } from "@liveblocks/yjs";
 import { useCallback, useEffect, useState } from "react";
-import { EditorState } from "@codemirror/state";
+import { EditorState, type Extension } from "@codemirror/state";
 import { EditorView, basicSetup } from "codemirror";
 import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
@@ -12,6 +12,12 @@ import { csharp } from "@replit/codemirror-lang-csharp";
 import { yCollab } from "y-codemirror.next";
 import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
+import {
+  Decoration,
+  type DecorationSet,
+  ViewPlugin,
+  type ViewUpdate,
+} from "@codemirror/view";
 import axios from "axios";
 import {
   Play,
@@ -53,7 +59,7 @@ const vscodeHighlightStyle = HighlightStyle.define([
   { tag: tags.special(tags.string), color: "#d7ba7d" },
 ]);
 
-// Enhanced theme with #111111 background and rounded borders
+// Enhanced theme with proper selection handling
 const enhancedTheme = EditorView.theme(
   {
     "&": {
@@ -68,7 +74,7 @@ const enhancedTheme = EditorView.theme(
     },
     ".cm-content": {
       caretColor: "#ffffff",
-      padding: "16px 12px",
+      padding: "10px 2px",
       minHeight: "100%",
       lineHeight: "1.5",
     },
@@ -90,12 +96,12 @@ const enhancedTheme = EditorView.theme(
       color: "#666666",
       border: "none",
       paddingLeft: "2px",
-      paddingRight: "2px", // Reduced gap between line numbers and code
-      minWidth: "18px",
+      paddingRight: "2px",
+      // minWidth: "18px",
       borderRadius: "8px 0 0 8px",
     },
     ".cm-gutterElement": {
-      padding: "0 0px", // Reduced padding
+      padding: "0 0px",
       minWidth: "18px",
     },
     ".cm-lineNumbers .cm-gutterElement": {
@@ -108,38 +114,6 @@ const enhancedTheme = EditorView.theme(
     ".cm-activeLineGutter": {
       backgroundColor: "#1a1a1a",
       color: "#ffffff",
-    },
-    // Enhanced text selection
-    ".cm-selectionBackground": {
-      backgroundColor: "#264f78 !important",
-    },
-    ".cm-focused .cm-selectionBackground": {
-      backgroundColor: "#264f78 !important",
-    },
-    ".cm-line ::selection": {
-      backgroundColor: "#264f78 !important",
-    },
-    ".cm-selectionLayer .cm-selectionBackground": {
-      backgroundColor: "#264f78 !important",
-    },
-    "&.cm-focused .cm-selectionBackground": {
-      backgroundColor: "#264f78 !important",
-    },
-    "&:not(.cm-focused) .cm-selectionBackground": {
-      backgroundColor: "#264f78 !important",
-      opacity: "0.7",
-    },
-    ".cm-content ::selection": {
-      backgroundColor: "#264f78 !important",
-      color: "inherit",
-    },
-    ".cm-content.cm-focused ::selection": {
-      backgroundColor: "#264f78 !important",
-      color: "inherit",
-    },
-    ".cm-selectionMatch": {
-      backgroundColor: "#264f78 !important",
-      opacity: "0.8",
     },
     ".cm-cursor": {
       borderLeftColor: "#ffffff",
@@ -183,19 +157,82 @@ const enhancedTheme = EditorView.theme(
     ".cm-panels.cm-panels-bottom": {
       borderTop: "1px solid #333333",
     },
-    ".cm-line": {
-      "& ::selection": {
-        backgroundColor: "#264f78 !important",
-      },
-    },
-    ".cm-content .cm-line": {
-      "& ::selection": {
-        backgroundColor: "#264f78 !important",
-      },
-    },
   },
   { dark: true }
 );
+
+// Custom selection theme that properly handles all text types
+const selectionTheme = EditorView.theme({
+  "&.cm-focused .cm-selectionBackground": {
+    backgroundColor: "#264f78",
+  },
+  ".cm-selectionBackground": {
+    backgroundColor: "#264f78",
+  },
+  ".cm-content": {
+    caretColor: "#ffffff",
+  },
+  // Override any potential conflicts
+  "& .cm-selectionLayer .cm-selectionBackground": {
+    backgroundColor: "#264f78 !important",
+  },
+});
+
+// Custom extension to ensure proper selection rendering
+const customSelectionExtension = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet = Decoration.none;
+
+    constructor(view: EditorView) {
+      this.decorations = this.buildDecorations(view);
+    }
+
+    update(update: ViewUpdate) {
+      if (update.selectionSet || update.docChanged || update.viewportChanged) {
+        this.decorations = this.buildDecorations(update.view);
+      }
+    }
+
+    buildDecorations(view: EditorView): DecorationSet {
+      const decorations = [];
+
+      for (const range of view.state.selection.ranges) {
+        if (!range.empty) {
+          decorations.push(
+            Decoration.mark({
+              class: "cm-custom-selection",
+              attributes: {
+                style: "background-color: #264f78; color: inherit;",
+              },
+            }).range(range.from, range.to)
+          );
+        }
+      }
+
+      return Decoration.set(decorations);
+    }
+  },
+  {
+    decorations: (v) => v.decorations,
+  }
+);
+
+// Selection configuration extension
+const selectionConfig = EditorView.theme({
+  ".cm-custom-selection": {
+    backgroundColor: "#264f78 !important",
+    color: "inherit !important",
+  },
+  // Ensure native selection also works
+  "::selection": {
+    backgroundColor: "#264f78 !important",
+    color: "inherit !important",
+  },
+  "::-moz-selection": {
+    backgroundColor: "#264f78 !important",
+    color: "inherit !important",
+  },
+});
 
 const languageMap = {
   c: { id: 1, ext: cpp, label: "C" },
@@ -217,8 +254,8 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [outputCollapsed, setOutputCollapsed] = useState(false);
   const [outputHeight, setOutputHeight] = useState(250);
-  const apiBaseUrl = "https://judge0-extra-ce.p.rapidapi.com";
 
+  const apiBaseUrl = "https://judge0-extra-ce.p.rapidapi.com";
   const room = useRoom();
   const provider = getYjsProviderForRoom(room);
   const [element, setElement] = useState<HTMLElement | null>(null);
@@ -246,16 +283,30 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
       colorLight: userInfo.colors[0] + "80",
     });
 
-    const editorExtensions = [
+    const editorExtensions: Extension[] = [
       basicSetup,
       languageMap[language].ext(),
       yCollab(ytext, provider.awareness, { undoManager }),
       enhancedTheme,
+      selectionTheme,
+      selectionConfig,
+      customSelectionExtension,
       syntaxHighlighting(vscodeHighlightStyle),
       EditorView.lineWrapping,
       EditorView.theme({
         ".cm-editor": { height: "100%" },
         ".cm-scroller": { overflow: "auto" },
+      }),
+      // Additional extension to handle selection properly
+      EditorView.domEventHandlers({
+        selectstart: (event, view) => {
+          // Allow native selection behavior
+          return false;
+        },
+        mousedown: (event, view) => {
+          // Ensure proper selection handling on mouse events
+          return false;
+        },
       }),
     ];
 
@@ -268,19 +319,48 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
       extensions: editorExtensions,
     });
 
-    const view = new EditorView({ state, parent: element });
+    const view = new EditorView({
+      state,
+      parent: element,
+    });
 
-    return () => view?.destroy();
+    // Add global CSS for selection as fallback
+    const style = document.createElement("style");
+    style.textContent = `
+      .cm-editor ::selection {
+        background-color: #264f78 !important;
+        color: inherit !important;
+      }
+      .cm-editor ::-moz-selection {
+        background-color: #264f78 !important;
+        color: inherit !important;
+      }
+      .cm-content ::selection {
+        background-color: #264f78 !important;
+        color: inherit !important;
+      }
+      .cm-content ::-moz-selection {
+        background-color: #264f78 !important;
+        color: inherit !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      view?.destroy();
+      document.head.removeChild(style);
+    };
   }, [element, room, userInfo, provider, language, canEdit]);
 
   const handleCodeSubmit = async () => {
     if (!yTextInstance) return alert("Editor not ready!");
+
     const currentCode = yTextInstance.toString().trim();
     if (!currentCode) return alert("No code provided!");
 
     setStatus("Submitting...");
     setOutput("");
-    setOutputCollapsed(false); // Auto-expand output when running
+    setOutputCollapsed(false);
 
     const axiosConfig = {
       headers: {
@@ -356,7 +436,6 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
           <div className="flex items-center gap-4">
             {yUndoManager && <Toolbar yUndoManager={yUndoManager} />}
           </div>
-
           <div className="flex items-center gap-3">
             <Select
               onValueChange={(val: Language) => setLanguage(val)}
@@ -385,7 +464,6 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
                 ))}
               </SelectContent>
             </Select>
-
             <Button
               disabled={status !== "Run"}
               onClick={handleCodeSubmit}
@@ -404,7 +482,6 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
               )}
             </Button>
           </div>
-
           <Avatars />
         </div>
 
@@ -415,8 +492,8 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
             className="bg-[#111111] rounded-lg border border-[#333333] overflow-hidden flex-shrink-0"
             style={{
               height: outputCollapsed
-                ? "calc(100vh - 140px)" // Account for navbar + header + padding
-                : `calc(100vh - ${outputHeight + 176}px)`, // Account for navbar + header + output + padding
+                ? "calc(100vh - 140px)"
+                : `calc(100vh - ${outputHeight + 176}px)`,
             }}
           >
             <div className="h-full" ref={ref} />
@@ -450,7 +527,6 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
                     </Badge>
                   )}
                 </div>
-
                 <Button
                   variant="ghost"
                   size="sm"
@@ -460,7 +536,6 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
                   <ChevronDown className="w-4 h-4" />
                 </Button>
               </div>
-
               {/* Output Content */}
               <div
                 className="flex-1 p-3 overflow-auto"
@@ -504,7 +579,6 @@ export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
                   </Badge>
                 )}
               </div>
-
               <Button
                 variant="ghost"
                 size="sm"
