@@ -14,9 +14,11 @@ import { useState } from "react";
 export default function CollabRoom({
   room,
   user,
+  canEdit
 }: {
   room: RoomDB;
   user: ExtendedUser;
+  canEdit: boolean;
 }) {
   const [isCopied, setIsCopied] = useState<boolean>();
   const isOwner = room.ownerId === user.id;
@@ -63,7 +65,7 @@ export default function CollabRoom({
             )}
           </div>
         </Card>
-        <CollaborativeEditor />
+        <CollaborativeEditor canEdit={canEdit} />
       </Room>
     </main>
   );

@@ -1,6 +1,6 @@
 "use client";
 import * as Y from "yjs";
-import { useRoom, useSelf, useOthers } from "@liveblocks/react/suspense";
+import { useRoom, useSelf } from "@liveblocks/react/suspense";
 import { getYjsProviderForRoom } from "@liveblocks/yjs";
 import { useCallback, useEffect, useState } from "react";
 import { EditorState } from "@codemirror/state";
@@ -207,7 +207,7 @@ const languageMap = {
 
 type Language = keyof typeof languageMap;
 
-export function CollaborativeEditor() {
+export function CollaborativeEditor({ canEdit }: { canEdit: boolean }) {
   const [output, setOutput] = useState("");
   const [outputStatus, setOutputStatus] = useState<"success" | "error" | null>(
     null
@@ -225,7 +225,6 @@ export function CollaborativeEditor() {
   const [yUndoManager, setYUndoManager] = useState<Y.UndoManager | null>(null);
   const [yTextInstance, setYTextInstance] = useState<Y.Text | null>(null);
   const userInfo = useSelf((me) => me.info);
-  const others = useOthers();
 
   const ref = useCallback((node: HTMLElement | null) => {
     setElement(node);
@@ -247,26 +246,32 @@ export function CollaborativeEditor() {
       colorLight: userInfo.colors[0] + "80",
     });
 
+    const editorExtensions = [
+      basicSetup,
+      languageMap[language].ext(),
+      yCollab(ytext, provider.awareness, { undoManager }),
+      enhancedTheme,
+      syntaxHighlighting(vscodeHighlightStyle),
+      EditorView.lineWrapping,
+      EditorView.theme({
+        ".cm-editor": { height: "100%" },
+        ".cm-scroller": { overflow: "auto" },
+      }),
+    ];
+
+    if (!canEdit) {
+      editorExtensions.push(EditorState.readOnly.of(true));
+    }
+
     const state = EditorState.create({
       doc: ytext.toString(),
-      extensions: [
-        basicSetup,
-        languageMap[language].ext(),
-        yCollab(ytext, provider.awareness, { undoManager }),
-        enhancedTheme,
-        syntaxHighlighting(vscodeHighlightStyle),
-        EditorView.lineWrapping,
-        EditorView.theme({
-          ".cm-editor": { height: "100%" },
-          ".cm-scroller": { overflow: "auto" },
-        }),
-      ],
+      extensions: editorExtensions,
     });
 
     const view = new EditorView({ state, parent: element });
 
     return () => view?.destroy();
-  }, [element, room, userInfo, provider, language]);
+  }, [element, room, userInfo, provider, language, canEdit]);
 
   const handleCodeSubmit = async () => {
     if (!yTextInstance) return alert("Editor not ready!");
@@ -357,20 +362,25 @@ export function CollaborativeEditor() {
               onValueChange={(val: Language) => setLanguage(val)}
               defaultValue={language}
             >
-                <SelectTrigger
+              <SelectTrigger
                 className="w-28 bg-[#222222] border-[#333333] text-[#d4d4d4] focus:border-[#007acc] h-7 min-h-0 py-0 px-2 rounded-sm text-xs leading-5"
-                style={{ height: "30px", minHeight: "0", paddingTop: 0, paddingBottom: 0 }}
-                >
+                style={{
+                  height: "30px",
+                  minHeight: "0",
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }}
+              >
                 <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#222222] border-[#333333] text-[#d4d4d4] rounded-sm text-xs py-0">
+              </SelectTrigger>
+              <SelectContent className="bg-[#222222] border-[#333333] text-[#d4d4d4] rounded-sm text-xs py-0">
                 {Object.entries(languageMap).map(([key, lang]) => (
                   <SelectItem
-                  key={key}
-                  value={key}
-                  className="focus:bg-[#094771] focus:text-white rounded-sm text-xs py-1"
+                    key={key}
+                    value={key}
+                    className="focus:bg-[#094771] focus:text-white rounded-sm text-xs py-1"
                   >
-                  {lang.label}
+                    {lang.label}
                   </SelectItem>
                 ))}
               </SelectContent>

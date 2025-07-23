@@ -69,6 +69,31 @@ class User {
       }
     }
   };
+
+  static getAccess = async (
+    userId: string,
+    roomId: string
+  ): Promise<string> => {
+    try {
+      const userRoom = await db.userRoom.findUnique({
+        where: {
+          userId_roomId: {
+            userId,
+            roomId,
+          },
+        },
+      });
+
+      return userRoom?.access || "VIEW";
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error in User.getRooms: ", error.stack);
+        throw new Error(error.message);
+      } else {
+        throw new Error("Couldn't find rooms by user ID.");
+      }
+    }
+  };
 }
 
 export default User;
