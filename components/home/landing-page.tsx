@@ -11,7 +11,7 @@ const font = Poppins({
 export const LandingPage = () => {
   console.log("landing page");
   return (
-    <div className="space-y-6 text-center">
+    <div className="space-y-6 pt-6 text-center">
       <h1
         className={cn(
           "text-6xl font-semibold text-white drop-shadow-md",
