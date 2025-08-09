@@ -10,6 +10,7 @@ import { RoomDB } from "@/types";
 import { ExtendedUser } from "@/next-auth";
 import { DeleteRoomButton } from "./delete-btn";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CollabRoom({
   room,
@@ -20,6 +21,8 @@ export default function CollabRoom({
   user: ExtendedUser;
   canEdit: boolean;
 }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>();
   const isOwner = room.ownerId === user.id;
 
@@ -53,12 +56,17 @@ export default function CollabRoom({
 
             {isOwner && (
               <>
-                <Link href={`/room/${room.id}/edit`}>
-                  <Button variant="outline" className="h-8 text-xs">
-                    <Pencil className="h-4 w-4" />
-                    <p>Edit</p>
-                  </Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={() => {
+                    setIsLoading(true);
+                    router.push(`/room/${room.id}/edit`);
+                  }}
+                >
+                  <Pencil className="h-4 w-4" />
+                  {isLoading ? <p>Editing...</p> : <p>Edit</p>}
+                </Button>
 
                 <DeleteRoomButton roomId={room.id} />
               </>

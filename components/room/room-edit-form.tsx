@@ -31,14 +31,17 @@ import { Trash2 } from "lucide-react";
 import { RoomDB } from "@/types";
 import { RoomAccess } from "@prisma/client";
 import { toast } from "sonner";
+import { ComingSoonDialog } from "../coming-soon";
 
 export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
-  console.log(roomData);
+  // console.log(roomData);
   const router = useRouter();
 
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
+  const [open, setOpen] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<RoomSchema>({
     resolver: zodResolver(roomSchema),
@@ -165,10 +168,21 @@ export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => appendGroup({ id: "", access: "VIEW" })}
+                  // onClick={() => appendGroup({ id: "", access: "VIEW" })}
+                  onClick={() => {
+                    console.log("coming soon...");
+                    setOpen(true);
+                  }}
                 >
                   Add Group
                 </Button>
+
+                <ComingSoonDialog
+                  open={open}
+                  onOpenChange={setOpen}
+                  title="Add groups to room"
+                  description="Hang on! You will be able to use this feature soon enough!"
+                />
               </div>
 
               {groupFields.map((field, index) => (
