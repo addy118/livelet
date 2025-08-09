@@ -13,10 +13,10 @@ export const metadata: Metadata = {
   description: "Modern authentication system built with Next.js",
 };
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
+// const poppins = Poppins({
+//   subsets: ["latin"],
+//   weight: ["400", "600", "700"],
+// });
 
 export default async function RootLayout({
   children,

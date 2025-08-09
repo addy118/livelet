@@ -16,7 +16,7 @@ export const ChangeEmailForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const user = useCurrentUser();
+  const { data: user } = useCurrentUser();
 
   useEffect(() => {
     if (error || success) {

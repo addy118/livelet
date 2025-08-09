@@ -1,7 +1,6 @@
 "use client";
 
 import { Loading } from "@/components/liveblocks-loading";
-import { useCurrentUser } from "@/hooks/use-current-user";
 import { ExtendedUser } from "@/next-auth";
 import { RoomDB } from "@/types";
 import { ClientSideSuspense, RoomProvider } from "@liveblocks/react/suspense";

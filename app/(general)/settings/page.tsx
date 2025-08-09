@@ -26,7 +26,7 @@ import { Switch } from "@/components/ui/switch";
 
 const Settings = () => {
   const { update } = useSession();
-  const user = useCurrentUser();
+  const { data: user } = useCurrentUser();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();

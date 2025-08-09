@@ -41,7 +41,6 @@ export const RoomEditForm = ({ roomData }: { roomData: RoomDB }) => {
   const [success, setSuccess] = useState<string | undefined>("");
   const [open, setOpen] = useState<boolean>(false);
   const [isPending, startTransition] = useTransition();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<RoomSchema>({
     resolver: zodResolver(roomSchema),

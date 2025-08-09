@@ -5,7 +5,6 @@ import { CollaborativeEditor } from "@/components/collab-editor";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Pencil } from "lucide-react";
-import Link from "next/link";
 import { RoomDB } from "@/types";
 import { ExtendedUser } from "@/next-auth";
 import { DeleteRoomButton } from "./delete-btn";
