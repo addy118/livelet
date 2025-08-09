@@ -14,7 +14,7 @@ import { useState } from "react";
 export default function CollabRoom({
   room,
   user,
-  canEdit
+  canEdit,
 }: {
   room: RoomDB;
   user: ExtendedUser;
@@ -38,7 +38,7 @@ export default function CollabRoom({
 
   return (
     <main>
-      <Room room={room}>
+      <Room user={user} room={room}>
         <Card className="py-2 px-6 font-semibold text-md flex-row flex items-center justify-between">
           <p>{room.name}</p>
 
