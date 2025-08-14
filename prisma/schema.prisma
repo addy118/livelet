@@ -100,7 +100,7 @@ model UserRoom {
   status    InviteStatus @default(PENDING)
   joinedAt  DateTime?
 
-  @@unique([userId, roomId])
+  @@id([userId, roomId])
   @@index([userId])
   @@index([roomId])
 }
@@ -113,7 +113,7 @@ model GroupRoom {
 
   access RoomAccess @default(VIEW)
 
-  @@unique([groupId, roomId])
+  @@id([groupId, roomId])
   @@index([groupId])
   @@index([roomId])
 }
@@ -126,7 +126,7 @@ model UserGroup {
 
   joinedAt DateTime @default(now())
 
-  @@unique([userId, groupId])
+  @@id([userId, groupId])
   @@index([userId])
   @@index([groupId])
 }
