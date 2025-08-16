@@ -55,12 +55,7 @@ The application is built on a modern, serverless architecture designed for real-
 - **Database Schema**: The ERD designed with Prisma for the PostgreSQL database.
   ![Database Schema](https://cdn.jsdelivr.net/gh/addy118/portfolio@master/public/schemas/livelet-erd.svg)
 
-For a deeper dive into the core logic, explore these diagrams in the project repository:
-
-- How the editor works in real-time?
-- User authentication using Auth.js
-- Collaborative room creation for coding
-- Room access authorization using Liveblocks API
+For a deeper dive into the core logic, visit [here](https://www.adityakirti.tech/projects/livelet)
 
 ## Getting Started
 
