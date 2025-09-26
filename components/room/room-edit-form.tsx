@@ -136,7 +136,7 @@ export const RoomEditForm = ({ roomData }: RoomEditFormProps) => {
     setSuccess("");
 
     // Validate that owner is included in users list
-    if (!values.users.some(user => user.id === roomData.ownerId)) {
+    if (!values.users || !values.users.some(user => user.id === roomData.ownerId)) {
       setError("Room owner must remain in the users list");
       return;
     }
