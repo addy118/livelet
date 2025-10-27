@@ -1,6 +1,6 @@
 "use server";
 
-import { Liveblocks, LiveblocksError, RoomData } from "@liveblocks/node";
+import { Liveblocks, LiveblocksError } from "@liveblocks/node";
 
 const { LIVEBLOCKS_SECRET_KEY } = process.env;
 if (!LIVEBLOCKS_SECRET_KEY) console.log("NO SECRET KEY FOUND");
