@@ -2,9 +2,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { CardWrapper } from "./card-wrapper";
 import { useSearchParams } from "next/navigation";
-import { newVerification } from "@/actions/new-verification";
-import { FormSuccess } from "../form-success";
-import { FormError } from "../form-error";
+import { newVerification } from "@/actions/auth/new-verification";
+import { FormSuccess } from "./form-success";
+import { FormError } from "./form-error";
 import Loading from "../loading";
 import { useRouter } from "next/navigation";
 

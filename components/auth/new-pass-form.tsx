@@ -16,11 +16,11 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { FormError } from "../form-error";
-import { FormSuccess } from "@/components/form-success";
+import { FormError } from "./form-error";
+import { FormSuccess } from "@/components/auth/form-success";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
-import { newPass } from "@/actions/new-pass";
+import { newPass } from "@/actions/auth/new-pass";
 
 export const NewPassForm = () => {
   const router = useRouter();

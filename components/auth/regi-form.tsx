@@ -16,9 +16,9 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { FormError } from "../form-error";
-import { FormSuccess } from "@/components/form-success";
-import { register } from "@/actions/register";
+import { FormError } from "./form-error";
+import { FormSuccess } from "@/components/auth/form-success";
+import { register } from "@/actions/auth/register";
 
 export const RegiForm = () => {
   const [error, setError] = useState<string | undefined>("");

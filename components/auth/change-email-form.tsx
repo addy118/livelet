@@ -3,9 +3,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { CardWrapper } from "./card-wrapper";
 import { BeatLoader } from "react-spinners";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormSuccess } from "../form-success";
-import { FormError } from "../form-error";
-import { emailChange } from "@/actions/email-change";
+import { FormSuccess } from "./form-success";
+import { FormError } from "./form-error";
+import { emailChange } from "@/actions/auth/email-change";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useSession } from "next-auth/react";
 
