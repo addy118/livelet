@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { RoomAccessType } from "@/types";
 import { InviteStatus, RoomAccess, RoomRole } from "@prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
 class Room {
   static getByRoomId = async (roomId: string) => {
@@ -23,7 +22,7 @@ class Room {
     }
   };
 
-  static upsert = async (
+  static create = async (
     id: string,
     name: string,
     ownerId: string,
@@ -32,83 +31,86 @@ class Room {
     userAcc: RoomAccessType[] = []
   ) => {
     try {
-      const room = await db.room.upsert({
-        // update existing room
-        where: { id },
-        update: {
-          name,
-          owner: { connect: { id: ownerId } },
-          default: defaultAcc as RoomAccess,
-        },
-
-        // create a new room
-        create: {
+      const room = await db.room.create({
+        data: {
           id,
           name,
           owner: { connect: { id: ownerId } },
           default: defaultAcc as RoomAccess,
+          users: {
+            create: userAcc.map((user) => ({
+              user: { connect: { id: user.id } },
+              access: user.access as RoomAccess,
+              role:
+                user.id == ownerId
+                  ? ("OWNER" as RoomRole)
+                  : ("MEMBER" as RoomRole),
+              inviter: { connect: { id: ownerId } },
+              status: "ACCEPTED" as InviteStatus,
+              joinedAt: new Date(),
+            })),
+          },
+          groups: {
+            create: groupAcc.map((group) => ({
+              group: { connect: { id: group.id } },
+              access: group.access as RoomAccess,
+            })),
+          },
         },
       });
 
-      // upsert user-room entries
-      for (const user of userAcc) {
-        await db.userRoom.upsert({
-          where: {
-            userId_roomId: {
-              userId: user.id,
-              roomId: id,
-            },
-          },
-          update: {
-            access: user.access as RoomAccess,
-            role: (user.id === ownerId ? "OWNER" : "MEMBER") as RoomRole,
-            inviter: { connect: { id: ownerId } },
-            status: "ACCEPTED" as InviteStatus,
-            joinedAt: new Date(),
-          },
-          create: {
-            user: { connect: { id: user.id } },
-            room: { connect: { id } },
-            access: user.access as RoomAccess,
-            role: (user.id === ownerId ? "OWNER" : "MEMBER") as RoomRole,
-            inviter: { connect: { id: ownerId } },
-            status: "ACCEPTED" as InviteStatus,
-            joinedAt: new Date(),
-          },
-        });
-      }
-
-      // upsert group entries
-      for (const group of groupAcc) {
-        await db.groupRoom.upsert({
-          where: {
-            groupId_roomId: {
-              groupId: group.id,
-              roomId: id,
-            },
-          },
-          update: {
-            access: group.access as RoomAccess,
-          },
-          create: {
-            group: { connect: { id: group.id } },
-            room: { connect: { id } },
-            access: group.access as RoomAccess,
-          },
-        });
-      }
-
       return room;
     } catch (error) {
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === "P2002"
-      ) {
-        throw new Error("Room already contains one of these users.");
-      } else if (error instanceof Error) {
-        console.error("Error in Room.upsert: ", error.stack);
+      if (error instanceof Error) {
+        console.error("Error in Room.create: ", error.stack);
         throw new Error(error.message);
-      } else throw new Error("Error in Room.upsert.");
+      } else throw new Error("Error in Room.create.");
+    }
+  };
+
+  static update = async (
+    id: string,
+    name: string,
+    ownerId: string,
+    defaultAcc: string = "VIEW",
+    groupAcc: RoomAccessType[] = [],
+    userAcc: RoomAccessType[] = []
+  ): Promise<void> => {
+    try {
+      const userAccData = userAcc.map((user) => ({
+        roomId: id,
+        userId: user.id,
+        access: user.access as RoomAccess,
+        role:
+          user.id == ownerId ? ("OWNER" as RoomRole) : ("MEMBER" as RoomRole),
+        invitedBy: ownerId,
+        status: "ACCEPTED" as InviteStatus,
+        joinedAt: new Date(),
+      }));
+
+      const groupAccData = groupAcc.map((group) => ({
+        roomId: id,
+        groupId: group.id,
+        access: group.access as RoomAccess,
+      }));
+
+      await db.$transaction([
+        db.room.update({
+          where: { id },
+          data: { name, default: defaultAcc as RoomAccess },
+        }),
+
+        db.userRoom.deleteMany({ where: { roomId: id } }),
+        db.userRoom.createMany({ data: userAccData }),
+
+        db.groupRoom.deleteMany({ where: { roomId: id } }),
+        db.groupRoom.createMany({ data: groupAccData }),
+      ]);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error in Room.update: ", error.stack);
+        throw new Error(error.message);
+      } else throw new Error("Error in Room.update.");
     }
   };
 
@@ -122,52 +124,6 @@ class Room {
       } else throw new Error("Error in Room.delete.");
     }
   };
-
-  // static create = async (
-  //   id: string,
-  //   name: string,
-  //   ownerId: string,
-  //   defaultAcc: string = "VIEW",
-  //   groupAcc: RoomAccessType[] = [],
-  //   userAcc: RoomAccessType[] = []
-  // ) => {
-  //   try {
-  //     const room = await db.room.create({
-  //       data: {
-  //         id,
-  //         name,
-  //         owner: { connect: { id: ownerId } },
-  //         default: defaultAcc as RoomAccess,
-  //         users: {
-  //           create: userAcc.map((user) => ({
-  //             user: { connect: { id: user.id } },
-  //             access: user.access as RoomAccess,
-  //             role:
-  //               user.id == ownerId
-  //                 ? ("OWNER" as RoomRole)
-  //                 : ("MEMBER" as RoomRole),
-  //             inviter: { connect: { id: ownerId } },
-  //             status: "ACCEPTED" as InviteStatus,
-  //             joinedAt: new Date(),
-  //           })),
-  //         },
-  //         groups: {
-  //           create: groupAcc.map((group) => ({
-  //             group: { connect: { id: group.id } },
-  //             access: group.access as RoomAccess,
-  //           })),
-  //         },
-  //       },
-  //     });
-
-  //     return room;
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       console.error("Error in Room.create: ", error.stack);
-  //       throw new Error(error.message);
-  //     } else throw new Error("Error in Room.create.");
-  //   }
-  // };
 }
 
 export default Room;

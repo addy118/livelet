@@ -2,24 +2,15 @@
 
 import Room from "@/data/room";
 import { currentUser } from "@/lib/auth";
-import {
-  createCollabRoom,
-  deleteCollabRoom,
-  updateCollabRoom,
-} from "@/lib/room";
-import { toLiveblocksData } from "@/lib/utils";
+import { genRoomId } from "@/lib/id";
+import { deleteCollabRoom } from "@/lib/room";
 import { roomSchema, RoomSchema } from "@/schemas";
-import { RoomAccess } from "@prisma/client";
+// import { RoomAccess } from "@prisma/client";
 
 export const newRoom = async (values: RoomSchema) => {
   const validatedFields = roomSchema.safeParse(values);
-
   if (!validatedFields.success) return { error: "Invalid Fields" };
-
-  if (!validatedFields.data) {
-    return { error: "No data entered." };
-  }
-
+  if (!validatedFields.data) return { error: "No data entered." };
   const { name, defaultAccess, groups, users } = validatedFields.data;
 
   try {
@@ -27,26 +18,9 @@ export const newRoom = async (values: RoomSchema) => {
     const user = await currentUser();
     if (!user || !user.id) return { error: "No user found" };
 
-    // add current user to room
-    users?.push({ id: user.id, access: "EDIT" as RoomAccess });
-
-    // transform data for liveblocks room creation
-    const { defaultAccesses, groupsAccesses, usersAccesses } = toLiveblocksData(
-      user.id,
-      defaultAccess,
-      groups,
-      users
-    );
-
-    // create liveblocks room
-    const room = await createCollabRoom(
-      defaultAccesses,
-      groupsAccesses,
-      usersAccesses
-    );
-
-    // store room metadata in db
-    await Room.upsert(room.id, name, user.id, defaultAccess, groups, users);
+    // add current user (owner) to room
+    users?.push({ id: user.id, access: "EDIT" });
+    await Room.create(genRoomId(), name, user.id, defaultAccess, groups, users);
 
     return { success: "New room created successfully" };
   } catch (error) {
@@ -60,42 +34,15 @@ export const newRoom = async (values: RoomSchema) => {
 
 export const updateRoom = async (values: RoomSchema, roomId: string) => {
   const validatedFields = roomSchema.safeParse(values);
-
   if (!validatedFields.success) return { error: "Invalid Fields" };
-
-  if (!validatedFields.data) {
-    return { error: "No data entered." };
-  }
-
+  if (!validatedFields.data) return { error: "No data entered." };
   const { name, defaultAccess, groups, users } = validatedFields.data;
 
   try {
     // form action logic
-    // console.log(values);
     const user = await currentUser();
     if (!user || !user.id) return { error: "No user found" };
-
-    // transform data for liveblocks room creation
-    const { defaultAccesses, groupsAccesses, usersAccesses } = toLiveblocksData(
-      user.id,
-      defaultAccess,
-      groups,
-      users
-    );
-
-    // update liveblocks room
-    const room = await updateCollabRoom(
-      roomId,
-      defaultAccesses,
-      groupsAccesses,
-      usersAccesses
-    );
-
-    // console.log("updated liveblocks room:");
-    // console.log(room);
-
-    // store room metadata in db
-    await Room.upsert(room.id, name, user.id, defaultAccess, groups, users);
+    await Room.update(roomId, name, user.id, defaultAccess, groups, users);
 
     return { success: "Room modified successfully" };
   } catch (error) {

@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { RoomAccess } from "@prisma/client";
 
 class User {
   static getByEmail = async (email: string) => {
@@ -49,14 +50,24 @@ class User {
 
   static getRooms = async (userId: string) => {
     try {
-      const rooms: { id: string; name: string; createdAt: Date }[] = [];
+      const rooms: {
+        id: string;
+        name: string;
+        access: RoomAccess;
+        createdAt: Date;
+      }[] = [];
       const roomsArr = await db.userRoom.findMany({
         where: { userId },
-        select: { room: { select: { id: true, name: true, createdAt: true } } },
+        select: {
+          room: {
+            select: { id: true, name: true, createdAt: true },
+          },
+          access: true,
+        },
       });
 
       roomsArr.forEach((elem) => {
-        rooms.push(elem.room);
+        rooms.push({ access: elem.access, ...elem.room });
       });
 
       return rooms;

@@ -5,8 +5,6 @@ export interface RoomAccessType {
   access: RoomAccess;
 }
 
-export type AccessTuple = ["room:read", "room:presence:write"] | ["room:write"];
-
 export interface BaseRoom {
   id: string;
   name: string;
@@ -28,10 +26,5 @@ export interface RoomDB {
   groups: {
     groupId: string;
     access: string;
-  }[]
+  }[];
 }
-
-export const accessMap: Record<"VIEW" | "EDIT", AccessTuple> = {
-  VIEW: ["room:read", "room:presence:write"],
-  EDIT: ["room:write"],
-} as const;
